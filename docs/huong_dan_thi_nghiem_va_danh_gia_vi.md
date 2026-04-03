@@ -191,13 +191,15 @@ Lưu ý quan trọng:
 
 - các testcase này dùng `traffic_config.mode: udp-latency`
 - script có chạy `iperf3`
-- nhưng `tools/run_testcase.py` hiện chưa parse throughput thực từ output `iperf3`
-- vì vậy KPI trong report hiện tại cho nhánh `udp-latency` chưa đủ để kết luận throughput một cách tự động
+- `tools/run_testcase.py` hiện đã parse các chỉ số UDP chính từ output `iperf3`
+- các KPI có thể chấm tự động ở nhánh này là `min_throughput_mbps`, `max_loss_pct` và `max_jitter_ms`
+- các KPI RTT như `max_avg_rtt_ms`, `max_p95_rtt_ms`, `max_p99_rtt_ms` vẫn không có dữ liệu thực trong nhánh `udp-latency`
 
 Do đó:
 
 - dùng các testcase này để tạo log và pcap là hợp lý
-- nhưng việc đánh giá throughput hiện tại phải đọc thêm `outputs/logs/udp-latency-test.log`
+- có thể đánh giá tự động throughput, loss và jitter ngay trong report
+- nếu testcase `udp-latency` vẫn khai báo KPI RTT, trạng thái đánh giá sẽ là `INCOMPLETE`
 
 ### 4.6. Chạy hàng loạt một nhóm testcase
 
@@ -345,13 +347,30 @@ expected_kpis: { max_avg_rtt_ms: 25, max_p95_rtt_ms: 35 }
 
 Lưu ý quan trọng:
 
-- hiện tại pipeline **chưa tự động pass/fail** theo `expected_kpis`
-- `expected_kpis` đang là ngưỡng mục tiêu để người vận hành đối chiếu thủ công
+- pipeline hiện đã tự động đánh giá `expected_kpis`
+- kết quả được ghi vào `outputs/reports/<testcase>.json` trong trường `evaluation`
+- ba trạng thái chính là:
+  - `PASS`: tất cả KPI được chấm và đều đạt ngưỡng
+  - `FAIL`: có ít nhất một KPI được chấm nhưng không đạt ngưỡng
+  - `INCOMPLETE`: testcase có KPI không thể chấm tự động với traffic mode hiện tại hoặc KPI chưa được hỗ trợ
 
 Nói ngắn gọn:
 
 - testcase lưu KPI thực
-- người dùng tự so sánh KPI thực với ngưỡng trong YAML
+- pipeline tự so sánh KPI thực với ngưỡng trong YAML
+- người vận hành chỉ cần đọc phần `evaluation`
+
+Có thể xem nhanh trạng thái đánh giá:
+
+```bash
+python3 -m tools.evaluate_testcase outputs/reports/<testcase>.json
+```
+
+Hoặc chỉ in trạng thái:
+
+```bash
+python3 -m tools.evaluate_testcase outputs/reports/<testcase>.json --summary-only
+```
 
 ## 6.3. Đánh giá attach và kết nối
 
@@ -410,12 +429,13 @@ Hiện tại nên đánh giá theo cách sau:
 1. đọc `outputs/logs/udp-latency-test.log`
 2. kiểm tra output `iperf3`
 3. dùng pcap để xác nhận có lưu lượng UDP đúng hướng
-4. không dựa hoàn toàn vào `avg_rtt_ms` trong report nếu testcase chạy nhánh `udp-latency`
+4. nếu report là `INCOMPLETE`, kiểm tra xem testcase có đang yêu cầu KPI RTT trên nhánh `udp-latency` hay không
 
 Lý do:
 
-- `tools/run_testcase.py` hiện chưa parse throughput thực từ `iperf3`
-- nên report KPI của testcase `udp-latency` chưa phản ánh chính xác throughput hoặc delay ứng dụng
+- `tools/run_testcase.py` đã parse `throughput_mbps`, `packet_loss_pct` và `jitter_ms` từ `iperf3`
+- nhánh `udp-latency` vẫn không tạo RTT thực ở mức ứng dụng như nhánh `ping`
+- vì vậy report của testcase `udp-latency` chỉ có thể tự chấm đầy đủ khi `expected_kpis` dùng đúng các KPI mà mode này hỗ trợ
 
 ## 7. Quy trình khuyến nghị cho một thí nghiệm hoàn chỉnh
 
@@ -485,7 +505,8 @@ Trong trạng thái hiện tại của repo:
 - luồng `ping` là luồng có KPI thực đáng tin nhất
 - `pcap_analyzer` hữu ích cho ICMP flow và loss
 - `export_results.sh` đủ tốt để tạo report nhanh sau thí nghiệm
-- testcase `udp-latency` có ích cho tạo traffic và thu pcap/log, nhưng phần chấm KPI throughput vẫn cần đọc thủ công từ log `iperf3`
+- testcase `udp-latency` hiện đã tự chấm được throughput, loss và jitter
+- testcase `udp-latency` vẫn nên tránh khai báo KPI RTT nếu muốn có trạng thái `PASS/FAIL` đầy đủ
 
 Nếu mục tiêu là đánh giá nhanh và chắc:
 
@@ -494,5 +515,5 @@ Nếu mục tiêu là đánh giá nhanh và chắc:
 
 Nếu mục tiêu là mở rộng nghiên cứu:
 
-- có thể bổ sung parser throughput cho `iperf3`
-- có thể thêm bước auto-compare `expected_kpis` để ra pass/fail tự động
+- có thể chuẩn hóa thêm bộ KPI cho `udp-latency` để tránh `INCOMPLETE`
+- có thể bổ sung thêm parser RTT ứng dụng cho nhánh UDP nếu cần đánh giá tail latency ở lớp traffic
