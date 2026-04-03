@@ -33,8 +33,23 @@ OMNETPP_ROOT_DEFAULT="${HOME}/opt/omnetpp-${OMNETPP_VERSION}"
 OMNETPP_TARBALL="${HOME}/.cache/5g-nr-sitl/omnetpp-${OMNETPP_VERSION}-linux-x86_64.tgz"
 OMNETPP_DOWNLOAD_URL="${OMNETPP_DOWNLOAD_URL:-https://github.com/omnetpp/omnetpp/releases/download/omnetpp-${OMNETPP_VERSION}/omnetpp-${OMNETPP_VERSION}-linux-x86_64.tgz}"
 PYTHON_VENV="${PROJECT_ROOT}/.venv"
+SRSRAN_PROJECT_SRC="${HOME}/src/srsRAN_Project"
+SRSRAN_4G_SRC="${HOME}/src/srsRAN_4G"
+
+cleanup_stale_srsran_ppas() {
+  if [[ "$UBUNTU_CODENAME" != "noble" ]]; then
+    return 0
+  fi
+  log "Removing stale srsRAN Launchpad PPA entries that do not publish Noble Release files."
+  sudo_if_needed rm -f \
+    /etc/apt/sources.list.d/softwareradiosystems-ubuntu-srsran-project-*.list \
+    /etc/apt/sources.list.d/softwareradiosystems-ubuntu-srsran-project-*.sources \
+    /etc/apt/sources.list.d/softwareradiosystems-ubuntu-srsran_4g-*.list \
+    /etc/apt/sources.list.d/softwareradiosystems-ubuntu-srsran_4g-*.sources
+}
 
 install_base_packages() {
+  cleanup_stale_srsran_ppas
   log "Installing base Ubuntu packages and build/runtime dependencies."
   sudo_if_needed apt-get update
   sudo_if_needed apt-get install -y \
@@ -43,7 +58,8 @@ install_base_packages() {
     tcpdump tshark wireshark iproute2 iptables iperf3 jq net-tools \
     libzmq3-dev libczmq-dev gnuradio flex bison dirmngr qtbase5-dev qtchooser \
     qt5-qmake qtbase5-dev-tools libqt5opengl5-dev libfftw3-dev libsctp-dev \
-    libyaml-cpp-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev
+    libyaml-cpp-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev \
+    libgtest-dev ninja-build
 }
 
 install_open5gs() {
@@ -72,6 +88,44 @@ install_srsran_packages() {
   sudo_if_needed add-apt-repository -y ppa:softwareradiosystems/srsran_4g
   sudo_if_needed apt-get update
   sudo_if_needed apt-get install -y srsran-project srsran_4g
+}
+
+build_srsran_project_from_source() {
+  log "Building srsRAN Project from source with ZMQ enabled."
+  mkdir -p "$(dirname "${SRSRAN_PROJECT_SRC}")"
+  if [[ ! -d "${SRSRAN_PROJECT_SRC}/.git" ]]; then
+    git clone --depth 1 https://github.com/srsran/srsRAN_Project.git "${SRSRAN_PROJECT_SRC}"
+  else
+    git -C "${SRSRAN_PROJECT_SRC}" pull --ff-only
+  fi
+  cmake -S "${SRSRAN_PROJECT_SRC}" -B "${SRSRAN_PROJECT_SRC}/build" -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
+  cmake --build "${SRSRAN_PROJECT_SRC}/build" -j"$(nproc)"
+  sudo_if_needed cmake --install "${SRSRAN_PROJECT_SRC}/build"
+}
+
+build_srsran_4g_from_source() {
+  log "Building srsRAN 4G from source for srsUE."
+  mkdir -p "$(dirname "${SRSRAN_4G_SRC}")"
+  if [[ ! -d "${SRSRAN_4G_SRC}/.git" ]]; then
+    git clone --depth 1 https://github.com/srsran/srsRAN_4G.git "${SRSRAN_4G_SRC}"
+  else
+    git -C "${SRSRAN_4G_SRC}" pull --ff-only
+  fi
+  cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
+  cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
+  sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"
+  command -v srsran_4g_install_configs.sh >/dev/null 2>&1 && srsran_4g_install_configs.sh user || true
+}
+
+install_or_build_srsran() {
+  if [[ "$UBUNTU_CODENAME" == "jammy" ]]; then
+    install_srsran_packages
+    return 0
+  fi
+
+  log "Ubuntu ${VERSION_ID:-unknown} detected. Falling back to source builds for srsRAN Project and srsRAN 4G."
+  build_srsran_project_from_source
+  build_srsran_4g_from_source
 }
 
 install_python_env() {
@@ -144,7 +198,7 @@ start_stack_if_requested() {
 install_base_packages
 install_mongodb
 install_open5gs
-install_srsran_packages
+install_or_build_srsran
 install_python_env
 install_omnetpp
 write_env_file

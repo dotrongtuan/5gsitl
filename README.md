@@ -89,6 +89,7 @@ Compatibility note:
 
 - the bootstrap defaults to a `15 kHz SCS` compatibility profile for `srsUE`-based SA proof-of-concept bring-up
 - the original research-oriented `mu=1 / 30 kHz` profiles are still preserved under `configs/nr_profiles/`
+- on Ubuntu `24.04`, the bootstrap falls back to source builds for `srsRAN Project` and `srsRAN 4G` because Launchpad PPA coverage may be incomplete
 
 1. Copy `.env.example` to `.env` and adjust paths for `Open5GS`, `srsRAN`, `GNU Radio`, and `OMNeT++`.
 2. Run `scripts/install_dependencies.sh`.

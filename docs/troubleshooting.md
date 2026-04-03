@@ -13,6 +13,7 @@
 - confirm the compatibility defaults in `.env` point to `gnb_zmq_compat.yaml` and `ue_zmq_compat.conf`
 - verify ZMQ endpoints in `configs/zmq/links.yaml`
 - confirm the UE namespace exists
+- on Ubuntu `24.04`, if Launchpad PPA installation fails, rerun the patched bootstrap so it uses source builds for `srsRAN Project` and `srsRAN 4G`
 
 ## Channel Emulator Is Idle
 
