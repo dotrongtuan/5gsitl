@@ -9,7 +9,3 @@ udm:
     client:
       nrf:
         - uri: http://127.0.0.10:7777
-  metrics:
-    server:
-      - address: 127.0.0.14
-        port: 9094

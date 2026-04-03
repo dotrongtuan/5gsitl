@@ -1,6 +1,7 @@
 logger:
   file:
     path: ./outputs/logs/open5gs/udr.log
+db_uri: mongodb://127.0.0.1/open5gs
 udr:
   sbi:
     server:
@@ -9,4 +10,3 @@ udr:
     client:
       nrf:
         - uri: http://127.0.0.10:7777
-  db_uri: mongodb://127.0.0.1/open5gs

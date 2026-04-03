@@ -53,7 +53,9 @@ def main() -> None:
     parser.add_argument("--gateway", default="10.45.0.1")
     parser.add_argument("--timeout", type=int, default=45)
     args = parser.parse_args()
-    print(json.dumps(wait_for_attach(args.namespace, args.interface, args.gateway, args.timeout)))
+    result = wait_for_attach(args.namespace, args.interface, args.gateway, args.timeout)
+    print(json.dumps(result))
+    raise SystemExit(0 if result["attached"] else 1)
 
 
 if __name__ == "__main__":

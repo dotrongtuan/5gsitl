@@ -23,6 +23,14 @@ stop_packaged_open5gs_services() {
   done
 }
 
+stop_existing_open5gs_processes() {
+  for proc in \
+    open5gs-nrfd open5gs-amfd open5gs-smfd open5gs-upfd open5gs-ausfd \
+    open5gs-udmd open5gs-udrd open5gs-pcfd open5gs-nssfd; do
+    sudo_if_needed pkill -x "${proc}" >/dev/null 2>&1 || true
+  done
+}
+
 start_mongodb() {
   if command -v mongod >/dev/null 2>&1; then
     if command -v systemctl >/dev/null 2>&1; then
@@ -52,6 +60,7 @@ start_mongodb() {
 
 mkdir -p "${PROJECT_ROOT}/outputs/logs/open5gs"
 stop_packaged_open5gs_services
+stop_existing_open5gs_processes
 start_mongodb
 
 if ! PYTHONPATH="${PROJECT_ROOT}" python3 -m tools.provision_subscribers \
