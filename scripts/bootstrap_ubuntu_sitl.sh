@@ -146,6 +146,7 @@ build_srsran_project_from_source() {
   cmake -S "${SRSRAN_PROJECT_SRC}" -B "${SRSRAN_PROJECT_SRC}/build" -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
   cmake --build "${SRSRAN_PROJECT_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_PROJECT_SRC}/build"
+  sudo_if_needed ldconfig
 }
 
 build_srsran_4g_from_source() {
@@ -159,6 +160,7 @@ build_srsran_4g_from_source() {
   cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
   cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"
+  sudo_if_needed ldconfig
   command -v srsran_4g_install_configs.sh >/dev/null 2>&1 && srsran_4g_install_configs.sh user || true
 }
 

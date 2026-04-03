@@ -26,5 +26,6 @@ if ! command -v opp_makemake >/dev/null 2>&1; then
   set -u
 fi
 
+rm -rf out
 opp_makemake -f --deep -O out -o omnetpp_sitl
 make -j"$(nproc)" MODE=release

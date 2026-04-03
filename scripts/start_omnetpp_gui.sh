@@ -6,7 +6,7 @@ if [[ ! -d "${OMNETPP_ROOT:-}" ]]; then
   die "OMNETPP_ROOT is not set to a valid OMNeT++ installation."
 fi
 
-if [[ ! -e "${PROJECT_ROOT}/omnetpp/src/omnetpp_sitl" ]] && [[ ! -d "${PROJECT_ROOT}/omnetpp/out" ]]; then
+if ! find "${PROJECT_ROOT}/omnetpp/out" -name 'libomnetpp_sitl.so' -o -name 'libomnetpp_sitl.dylib' -o -name 'omnetpp_sitl.dll' 2>/dev/null | grep -q .; then
   bash "${PROJECT_ROOT}/omnetpp/build.sh"
 fi
 

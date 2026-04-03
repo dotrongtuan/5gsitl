@@ -5,15 +5,17 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 require_bin "${SRSRAN_UE_BIN:-srsue}"
 mkdir -p "${PROJECT_ROOT}/outputs/logs/ue"
 
+UE_LIB_PATH="/usr/local/lib:/usr/local/lib64:${LD_LIBRARY_PATH:-}"
+
 if ! sudo_if_needed ip netns list | grep -q "${UE_NAMESPACE:-ue1}"; then
   sudo_if_needed ip netns add "${UE_NAMESPACE:-ue1}"
 fi
 
 if [[ "$(id -u)" -eq 0 ]]; then
-  nohup "${SRSRAN_UE_BIN:-srsue}" "${SRSRAN_UE_CONFIG:-${PROJECT_ROOT}/configs/ue/ue_zmq.conf}" \
+  nohup env LD_LIBRARY_PATH="${UE_LIB_PATH}" "${SRSRAN_UE_BIN:-srsue}" "${SRSRAN_UE_CONFIG:-${PROJECT_ROOT}/configs/ue/ue_zmq.conf}" \
     > "${PROJECT_ROOT}/outputs/logs/ue/ue.stdout.log" 2>&1 &
 else
-  nohup sudo "${SRSRAN_UE_BIN:-srsue}" "${SRSRAN_UE_CONFIG:-${PROJECT_ROOT}/configs/ue/ue_zmq.conf}" \
+  nohup sudo env LD_LIBRARY_PATH="${UE_LIB_PATH}" "${SRSRAN_UE_BIN:-srsue}" "${SRSRAN_UE_CONFIG:-${PROJECT_ROOT}/configs/ue/ue_zmq.conf}" \
     > "${PROJECT_ROOT}/outputs/logs/ue/ue.stdout.log" 2>&1 &
 fi
 write_pid ue "$!"

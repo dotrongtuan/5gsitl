@@ -1,10 +1,14 @@
 logger:
-  file: ./outputs/logs/open5gs/amf.log
+  file:
+    path: ./outputs/logs/open5gs/amf.log
 amf:
   sbi:
     server:
       - address: 127.0.0.11
         port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777
   ngap:
     server:
       - address: 10.10.0.10

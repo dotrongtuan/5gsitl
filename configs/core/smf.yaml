@@ -1,13 +1,20 @@
 logger:
-  file: ./outputs/logs/open5gs/smf.log
+  file:
+    path: ./outputs/logs/open5gs/smf.log
 smf:
   sbi:
     server:
       - address: 127.0.0.12
         port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777
   pfcp:
     server:
       - address: 127.0.0.12
+    client:
+      upf:
+        - address: 127.0.0.13
   gtpc:
     server:
       - address: 127.0.0.12
@@ -19,7 +26,8 @@ smf:
       - address: 127.0.0.12
         port: 9092
   session:
-    - subnet: 10.45.0.1/16
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
       dnn: internet
       dev: ogstun
       mtu: 1400

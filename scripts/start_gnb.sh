@@ -5,7 +5,8 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 require_bin "${SRSRAN_GNB_BIN:-gnb}"
 mkdir -p "${PROJECT_ROOT}/outputs/logs/gnb"
 
-nohup "${SRSRAN_GNB_BIN:-gnb}" -c "${SRSRAN_GNB_CONFIG:-${PROJECT_ROOT}/configs/gnb/gnb_zmq.yaml}" \
+GNB_LIB_PATH="/usr/local/lib:/usr/local/lib64:${LD_LIBRARY_PATH:-}"
+nohup env LD_LIBRARY_PATH="${GNB_LIB_PATH}" "${SRSRAN_GNB_BIN:-gnb}" -c "${SRSRAN_GNB_CONFIG:-${PROJECT_ROOT}/configs/gnb/gnb_zmq.yaml}" \
   > "${PROJECT_ROOT}/outputs/logs/gnb/gnb.stdout.log" 2>&1 &
 write_pid gnb "$!"
 
