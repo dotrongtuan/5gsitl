@@ -132,7 +132,15 @@ bash scripts/run_runtime_demo.sh testcases/nr/nr_baseline_connectivity.yaml
 
 The runtime demo now waits for actual UE attach evidence before running the testcase. If UE attach or routing is incomplete, the demo exits with a failure instead of silently producing synthetic-looking baseline results.
 
-For the bootstrap compatibility path, the bypass channel profile now prefers a direct ZMQ bridge fallback when GNU Radio channel blocks are unavailable. This keeps the baseline SA bring-up path usable even on hosts where GNU Radio's ZMQ runtime integration is incomplete.
+For the current bootstrap compatibility path, the known-good SA attach baseline is documented in `docs/runtime_compat_attach_baseline.md`. That baseline uses:
+
+- `amf_compat.yaml`
+- `smf_compat.yaml`
+- `pcf.yaml` with MongoDB enabled
+- `subscribers_compat.yaml`
+- `gnb_zmq_compat.yaml`
+- `ue_zmq_compat.conf`
+- `bypass_compat.yaml` in `direct-zmq` mode
 
 ## Running Captures
 
