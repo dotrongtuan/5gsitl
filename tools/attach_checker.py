@@ -32,18 +32,45 @@ def gateway_reachable(namespace: str, gateway: str) -> bool:
     return result.returncode == 0
 
 
+def ensure_gateway_routes(namespace: str, interface: str, gateway: str) -> None:
+    _run(["sudo", "ip", "netns", "exec", namespace, "ip", "route", "replace", f"{gateway}/32", "dev", interface])
+    _run(["sudo", "ip", "netns", "exec", namespace, "ip", "route", "replace", "default", "via", gateway, "dev", interface])
+
+
 def wait_for_attach(namespace: str, interface: str, gateway: str, timeout_s: int) -> dict[str, str | bool]:
     deadline = time.time() + timeout_s
+    last_ue_ip = ""
     while time.time() < deadline:
         ue_ip = detect_ue_ip(namespace, interface)
-        if ue_ip and gateway_reachable(namespace, gateway):
-            update_runtime_state(attach_state="attached", ue_ip=ue_ip)
-            record_event("ue.attach", f"UE attached with IP {ue_ip}", namespace=namespace, interface=interface, gateway=gateway)
-            return {"attached": True, "ue_ip": ue_ip}
+        if ue_ip:
+            last_ue_ip = ue_ip
+            if gateway_reachable(namespace, gateway):
+                update_runtime_state(attach_state="attached", ue_ip=ue_ip)
+                record_event("ue.attach", f"UE attached with IP {ue_ip}", namespace=namespace, interface=interface, gateway=gateway)
+                return {"attached": True, "ue_ip": ue_ip}
+            ensure_gateway_routes(namespace, interface, gateway)
+            if gateway_reachable(namespace, gateway):
+                update_runtime_state(attach_state="attached", ue_ip=ue_ip)
+                record_event(
+                    "ue.attach",
+                    f"UE attached with IP {ue_ip} after configuring namespace routes",
+                    namespace=namespace,
+                    interface=interface,
+                    gateway=gateway,
+                )
+                return {"attached": True, "ue_ip": ue_ip}
         time.sleep(1.0)
-    update_runtime_state(attach_state="failed")
-    record_event("ue.attach", "UE attach check timed out", namespace=namespace, interface=interface, gateway=gateway, timeout_s=timeout_s)
-    return {"attached": False, "ue_ip": ""}
+    update_runtime_state(attach_state="failed", ue_ip=last_ue_ip)
+    record_event(
+        "ue.attach",
+        "UE attach check timed out",
+        namespace=namespace,
+        interface=interface,
+        gateway=gateway,
+        timeout_s=timeout_s,
+        ue_ip=last_ue_ip,
+    )
+    return {"attached": False, "ue_ip": last_ue_ip}
 
 
 def main() -> None:
