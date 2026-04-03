@@ -20,6 +20,7 @@ dependencies = [
   "typer>=0.12",
   "jsonschema>=4.23",
   "pytest>=8.3",
+  "pyzmq>=26.0",
 ]
 
 [project.scripts]
