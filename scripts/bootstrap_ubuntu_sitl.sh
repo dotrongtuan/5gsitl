@@ -62,6 +62,17 @@ install_base_packages() {
     libgtest-dev ninja-build
 }
 
+install_omnetpp_python_modules() {
+  log "Installing Python modules required by OMNeT++ configure/IDE checks."
+  sudo_if_needed apt-get install -y python3-pandas python3-posix-ipc || true
+
+  if ! python3 -c "import pandas, posix_ipc" >/dev/null 2>&1; then
+    log "Falling back to pip for missing OMNeT++ Python modules."
+    python3 -m pip install --user pandas posix_ipc >/dev/null 2>&1 || \
+      python3 -m pip install --user --break-system-packages pandas posix_ipc
+  fi
+}
+
 install_open5gs() {
   log "Installing Open5GS from the official PPA."
   sudo_if_needed add-apt-repository -y ppa:open5gs/latest
@@ -207,6 +218,7 @@ start_stack_if_requested() {
 }
 
 install_base_packages
+install_omnetpp_python_modules
 install_mongodb
 install_open5gs
 install_or_build_srsran
