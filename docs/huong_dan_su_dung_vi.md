@@ -60,6 +60,7 @@ Tín hiệu đúng của baseline:
 Tài liệu baseline chi tiết hơn nằm ở:
 
 - `docs/runtime_compat_attach_baseline.md`
+- `docs/huong_dan_thi_nghiem_va_danh_gia_vi.md`
 
 ## 4. Yêu cầu môi trường
 

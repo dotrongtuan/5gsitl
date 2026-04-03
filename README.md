@@ -18,6 +18,7 @@ No SDR, USRP, OTA, or physical RF front-end is required.
 Vietnamese documentation:
 
 - `docs/huong_dan_su_dung_vi.md`
+- `docs/huong_dan_thi_nghiem_va_danh_gia_vi.md`
 
 ## 5-Minute Quick Start
 
