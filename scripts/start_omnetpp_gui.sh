@@ -10,7 +10,7 @@ if [[ ! -e "${PROJECT_ROOT}/omnetpp/src/omnetpp_sitl" ]] && [[ ! -d "${PROJECT_R
   bash "${PROJECT_ROOT}/omnetpp/build.sh"
 fi
 
-nohup bash -lc "cd '${PROJECT_ROOT}/omnetpp' && source '${OMNETPP_ROOT}/setenv' && LIB=\$(find out -name 'omnetpp_sitl*' | head -n 1) && opp_run -u Qtenv -n ned -l \"\${LIB}\" ${OMNETPP_INI:-simulations/omnetpp.ini}" \
+nohup bash -lc "cd '${PROJECT_ROOT}/omnetpp' && set +u && source '${OMNETPP_ROOT}/setenv' && set -u && LIB=\$(find out -name 'omnetpp_sitl*' | head -n 1) && opp_run -u Qtenv -n ned -l \"\${LIB}\" ${OMNETPP_INI:-simulations/omnetpp.ini}" \
   > "${PROJECT_ROOT}/outputs/logs/omnetpp.stdout.log" 2>&1 &
 write_pid omnetpp "$!"
 
