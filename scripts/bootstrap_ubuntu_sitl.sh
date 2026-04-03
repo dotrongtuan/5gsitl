@@ -40,6 +40,18 @@ SRSRAN_4G_SRC="${HOME}/src/srsRAN_4G"
 SRSRAN_PROJECT_REF="${SRSRAN_PROJECT_REF:-release_25_04}"
 SRSRAN_4G_REF="${SRSRAN_4G_REF:-release_23_11}"
 
+relax_srsran_4g_werror() {
+  local repo_dir="$1"
+  local file
+
+  log "Relaxing srsRAN 4G -Werror flags for GCC 13+ compatibility."
+  while IFS= read -r -d '' file; do
+    sed -E -i \
+      -e 's/(^|[[:space:]])-Werror([[:space:]]|$)/ /g' \
+      "${file}"
+  done < <(find "${repo_dir}" -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print0)
+}
+
 cleanup_stale_srsran_ppas() {
   if [[ "$UBUNTU_CODENAME" != "noble" ]]; then
     return 0
@@ -161,6 +173,7 @@ build_srsran_4g_from_source() {
     git -C "${SRSRAN_4G_SRC}" fetch --all --tags --prune
   fi
   git -C "${SRSRAN_4G_SRC}" checkout --force "${SRSRAN_4G_REF}"
+  relax_srsran_4g_werror "${SRSRAN_4G_SRC}"
   cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
   cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"

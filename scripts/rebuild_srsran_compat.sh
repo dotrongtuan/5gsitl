@@ -7,6 +7,18 @@ SRSRAN_4G_SRC="${SRSRAN_4G_SRC:-${HOME}/src/srsRAN_4G}"
 SRSRAN_PROJECT_REF="${SRSRAN_PROJECT_REF:-release_25_04}"
 SRSRAN_4G_REF="${SRSRAN_4G_REF:-release_23_11}"
 
+relax_srsran_4g_werror() {
+  local repo_dir="$1"
+  local file
+
+  log "Relaxing srsRAN 4G -Werror flags for GCC 13+ compatibility."
+  while IFS= read -r -d '' file; do
+    sed -E -i \
+      -e 's/(^|[[:space:]])-Werror([[:space:]]|$)/ /g' \
+      "${file}"
+  done < <(find "${repo_dir}" -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print0)
+}
+
 rebuild_repo() {
   local name="$1"
   local repo_url="$2"
@@ -23,6 +35,9 @@ rebuild_repo() {
     git -C "${repo_dir}" fetch --all --tags --prune
   fi
   git -C "${repo_dir}" checkout --force "${ref}"
+  if [[ "${name}" == "srsRAN 4G" ]]; then
+    relax_srsran_4g_werror "${repo_dir}"
+  fi
   cmake -S "${repo_dir}" -B "${repo_dir}/build" "${cmake_args[@]}"
   cmake --build "${repo_dir}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${repo_dir}/build"
