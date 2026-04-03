@@ -16,7 +16,7 @@ def main() -> None:
     with out.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle,
-            fieldnames=["current_rtt_ms", "avg_rtt_ms", "p95_rtt_ms", "p99_rtt_ms", "packet_loss_pct", "jitter_ms"],
+            fieldnames=["current_rtt_ms", "avg_rtt_ms", "p95_rtt_ms", "p99_rtt_ms", "throughput_mbps", "packet_loss_pct", "jitter_ms"],
         )
         writer.writeheader()
         writer.writerow(
@@ -25,6 +25,7 @@ def main() -> None:
                 "avg_rtt_ms": metrics.get("avg_rtt_ms", 0.0),
                 "p95_rtt_ms": metrics.get("p95_rtt_ms", 0.0),
                 "p99_rtt_ms": metrics.get("p99_rtt_ms", 0.0),
+                "throughput_mbps": metrics.get("throughput_mbps", 0.0),
                 "packet_loss_pct": metrics.get("packet_loss_pct", 0.0),
                 "jitter_ms": metrics.get("jitter_ms", 0.0),
             }

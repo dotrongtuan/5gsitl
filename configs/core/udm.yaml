@@ -1,11 +1,11 @@
 logger:
-  file: ./outputs/logs/open5gs/udm.log
+  file:
+    path: ./outputs/logs/open5gs/udm.log
 udm:
   sbi:
     server:
       - address: 127.0.0.14
         port: 7777
-  metrics:
-    server:
-      - address: 127.0.0.14
-        port: 9094
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777

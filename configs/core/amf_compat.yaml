@@ -26,18 +26,16 @@ amf:
     - plmn_id: { mcc: 001, mnc: 01 }
       s_nssai:
         - { sst: 1, sd: "000001" }
-        - { sst: 1, sd: "000002" }
-        - { sst: 1, sd: "000003" }
   security:
     integrity_order: [NIA2, NIA1, NIA0]
     ciphering_order: [NEA0, NEA1, NEA2]
   network_name:
     full: 5G NR SITL
-  amf_name: sitl-amf0
+  amf_name: sitl-amf0-compat
   time:
     t3502:
       value: 720
     t3512:
       value: 540
 notes:
-  - TODO(version-check): confirm AMF key names for installed Open5GS release
+  - Compatibility AMF profile restricted to the default slice for srsUE SA attach.

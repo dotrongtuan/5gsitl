@@ -1,0 +1,7 @@
+subscribers:
+  - imsi: "001010123456780"
+    key: "00112233445566778899AABBCCDDEEFF"
+    opc: "63BFA50EE6523365FF14C1F45F88737D"
+    dnn: internet
+    slices:
+      - { sst: 1, sd: "000001" }

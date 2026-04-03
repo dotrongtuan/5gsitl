@@ -37,6 +37,20 @@ OMNETPP_ENABLE_OSGEARTH="${OMNETPP_ENABLE_OSGEARTH:-0}"
 PYTHON_VENV="${PROJECT_ROOT}/.venv"
 SRSRAN_PROJECT_SRC="${HOME}/src/srsRAN_Project"
 SRSRAN_4G_SRC="${HOME}/src/srsRAN_4G"
+SRSRAN_PROJECT_REF="${SRSRAN_PROJECT_REF:-release_25_04}"
+SRSRAN_4G_REF="${SRSRAN_4G_REF:-release_23_11}"
+
+relax_srsran_4g_werror() {
+  local repo_dir="$1"
+  local file
+
+  log "Relaxing srsRAN 4G -Werror flags for GCC 13+ compatibility."
+  while IFS= read -r -d '' file; do
+    sed -E -i \
+      -e 's/(^|[[:space:]])-Werror([[:space:]]|$)/ /g' \
+      "${file}"
+  done < <(find "${repo_dir}" -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print0)
+}
 
 cleanup_stale_srsran_ppas() {
   if [[ "$UBUNTU_CODENAME" != "noble" ]]; then
@@ -136,29 +150,44 @@ install_srsran_packages() {
 }
 
 build_srsran_project_from_source() {
-  log "Building srsRAN Project from source with ZMQ enabled."
+  log "Building srsRAN Project from source with ZMQ enabled at ref ${SRSRAN_PROJECT_REF}."
   mkdir -p "$(dirname "${SRSRAN_PROJECT_SRC}")"
   if [[ ! -d "${SRSRAN_PROJECT_SRC}/.git" ]]; then
-    git clone --depth 1 https://github.com/srsran/srsRAN_Project.git "${SRSRAN_PROJECT_SRC}"
+    git clone https://github.com/srsran/srsRAN_Project.git "${SRSRAN_PROJECT_SRC}"
   else
-    git -C "${SRSRAN_PROJECT_SRC}" pull --ff-only
+    git -C "${SRSRAN_PROJECT_SRC}" fetch --all --tags --prune
   fi
+  git -C "${SRSRAN_PROJECT_SRC}" checkout --force "${SRSRAN_PROJECT_REF}"
   cmake -S "${SRSRAN_PROJECT_SRC}" -B "${SRSRAN_PROJECT_SRC}/build" -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
   cmake --build "${SRSRAN_PROJECT_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_PROJECT_SRC}/build"
+  sudo_if_needed ldconfig
 }
 
 build_srsran_4g_from_source() {
-  log "Building srsRAN 4G from source for srsUE."
+  log "Building srsRAN 4G from source for srsUE at ref ${SRSRAN_4G_REF}."
   mkdir -p "$(dirname "${SRSRAN_4G_SRC}")"
   if [[ ! -d "${SRSRAN_4G_SRC}/.git" ]]; then
-    git clone --depth 1 https://github.com/srsran/srsRAN_4G.git "${SRSRAN_4G_SRC}"
+    git clone https://github.com/srsran/srsRAN_4G.git "${SRSRAN_4G_SRC}"
   else
-    git -C "${SRSRAN_4G_SRC}" pull --ff-only
+    git -C "${SRSRAN_4G_SRC}" fetch --all --tags --prune
   fi
-  cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
+  git -C "${SRSRAN_4G_SRC}" checkout --force "${SRSRAN_4G_REF}"
+  relax_srsran_4g_werror "${SRSRAN_4G_SRC}"
+  cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build" \
+    -DENABLE_WERROR=OFF \
+    -DENABLE_SRSENB=OFF \
+    -DENABLE_SRSEPC=OFF \
+    -DENABLE_GUI=OFF \
+    -DENABLE_UHD=OFF \
+    -DENABLE_BLADERF=OFF \
+    -DENABLE_SOAPYSDR=OFF \
+    -DENABLE_SKIQ=OFF \
+    -DENABLE_HARDSIM=OFF \
+    -DENABLE_ZEROMQ=ON
   cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"
+  sudo_if_needed ldconfig
   command -v srsran_4g_install_configs.sh >/dev/null 2>&1 && srsran_4g_install_configs.sh user || true
 }
 
@@ -213,7 +242,11 @@ write_env_file() {
     -e "s#^PROJECT_ROOT=.*#PROJECT_ROOT=${PROJECT_ROOT}#" \
     -e "s#^OMNETPP_ROOT=.*#OMNETPP_ROOT=${OMNETPP_ROOT_DEFAULT}#" \
     -e "s#^OPEN5GS_CONFIG_DIR=.*#OPEN5GS_CONFIG_DIR=${PROJECT_ROOT}/configs/core#" \
-    -e "s#^OPEN5GS_SUBSCRIBERS_FILE=.*#OPEN5GS_SUBSCRIBERS_FILE=${PROJECT_ROOT}/configs/core/subscribers.yaml#" \
+    -e "s#^OPEN5GS_SUBSCRIBERS_FILE=.*#OPEN5GS_SUBSCRIBERS_FILE=${PROJECT_ROOT}/configs/core/subscribers_compat.yaml#" \
+    -e "s#^OPEN5GS_AMF_CONFIG=.*#OPEN5GS_AMF_CONFIG=${PROJECT_ROOT}/configs/core/amf_compat.yaml#" \
+    -e "s#^OPEN5GS_SMF_CONFIG=.*#OPEN5GS_SMF_CONFIG=${PROJECT_ROOT}/configs/core/smf_compat.yaml#" \
+    -e "s#^OPEN5GS_ENABLE_PCF=.*#OPEN5GS_ENABLE_PCF=1#" \
+    -e "s#^OPEN5GS_ENABLE_NSSF=.*#OPEN5GS_ENABLE_NSSF=0#" \
     -e "s#^SRSRAN_GNB_CONFIG=.*#SRSRAN_GNB_CONFIG=${PROJECT_ROOT}/configs/gnb/gnb_zmq_compat.yaml#" \
     -e "s#^SRSRAN_UE_CONFIG=.*#SRSRAN_UE_CONFIG=${PROJECT_ROOT}/configs/ue/ue_zmq_compat.conf#" \
     -e "s#^GNURADIO_CHANNEL_PROFILE=.*#GNURADIO_CHANNEL_PROFILE=${PROJECT_ROOT}/configs/channel/bypass_compat.yaml#" \
@@ -236,7 +269,7 @@ run_post_install_setup() {
   bash "${PROJECT_ROOT}/scripts/setup_host_network.sh"
   PATH="${PYTHON_VENV}/bin:${PATH}" PYTHONPATH="${PROJECT_ROOT}" \
     python3 -m tools.provision_subscribers \
-    --subscribers "${PROJECT_ROOT}/configs/core/subscribers.yaml" \
+    --subscribers "${PROJECT_ROOT}/configs/core/subscribers_compat.yaml" \
     --db-uri "mongodb://127.0.0.1/open5gs"
 }
 

@@ -1,8 +1,3 @@
-package sitl;
-
-import sitl.ExternalStateBridge;
-import sitl.VisualNode;
-
 network SITLTopology
 {
     parameters:
@@ -27,7 +22,7 @@ network SITLTopology
         zmqDownlink: VisualNode { parameters: label = "Virtual RF\\nZMQ DL"; @display("p=820,200;i=block/queue"); }
         zmqUplink: VisualNode { parameters: label = "Virtual RF\\nZMQ UL"; @display("p=820,560;i=block/queue"); }
 
-        channel: VisualNode { parameters: label = "Channel\\nGNU Radio"; @display("p=1080,380;i=block/wifirouter"); }
+        channelSim: VisualNode { parameters: label = "Channel\\nGNU Radio"; @display("p=1080,380;i=block/wifirouter"); }
 
         latencyMonitor: VisualNode { parameters: label = "Measure\\nLatency"; @display("p=1360,180;i=block/chart"); }
         kpiCollector: VisualNode { parameters: label = "Measure\\nKPI"; @display("p=1360,280;i=block/chart"); }
@@ -46,9 +41,9 @@ network SITLTopology
         upf.io++ <--> { @display("ls=green,2"); } <--> gnb.io++;
         gnb.io++ <--> { @display("ls=red,2"); } <--> zmqDownlink.io++;
         gnb.io++ <--> { @display("ls=red,2"); } <--> zmqUplink.io++;
-        zmqDownlink.io++ <--> { @display("ls=red,2"); } <--> channel.io++;
-        zmqUplink.io++ <--> { @display("ls=red,2"); } <--> channel.io++;
-        channel.io++ <--> { @display("ls=green,2"); } <--> ue.io++;
+        zmqDownlink.io++ <--> { @display("ls=red,2"); } <--> channelSim.io++;
+        zmqUplink.io++ <--> { @display("ls=red,2"); } <--> channelSim.io++;
+        channelSim.io++ <--> { @display("ls=green,2"); } <--> ue.io++;
         ue.io++ <--> { @display("ls=orange,2"); } <--> latencyMonitor.io++;
         ue.io++ <--> { @display("ls=orange,2"); } <--> kpiCollector.io++;
         upf.io++ <--> { @display("ls=orange,2"); } <--> captureSubsystem.io++;

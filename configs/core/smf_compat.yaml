@@ -30,13 +30,8 @@ smf:
       gateway: 10.45.0.1
       dnn: internet
       dev: ogstun
-      mtu: 1400
   dns:
     - 8.8.8.8
     - 1.1.1.1
-  s_nssai:
-    - { sst: 1, sd: "000001", dnn: internet }
-    - { sst: 1, sd: "000002", dnn: internet-lowlat }
-    - { sst: 1, sd: "000003", dnn: sensors }
 notes:
-  - TODO(version-check): validate PFCP/GTP-U layout against Open5GS package version
+  - Compatibility SMF profile omits unsupported s_nssai keys for Open5GS v2.7.7.

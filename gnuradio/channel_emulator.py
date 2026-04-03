@@ -34,25 +34,29 @@ def _write_status(profile: dict, mode: str) -> None:
 
 def _run_dummy(profile: dict) -> None:
     flag = _install_signal_handlers()
-    _write_status(profile, "dummy")
+    _write_status(profile, str(profile.get("mode_hint", "dummy")))
     while not flag.stopped:
         time.sleep(1.0)
 
 
 def _build_direction(tb: "gr.top_block", source_endpoint: str, sink_endpoint: str, sample_rate: float, noise: float, freq_offset_hz: float, delay_ms: float) -> None:
     assert gr and blocks and channels and zeromq
-    src = zeromq.sub_source(gr.sizeof_gr_complex, 1, source_endpoint, 100, False, -1)
+    src = zeromq.req_source(gr.sizeof_gr_complex, 1, source_endpoint, 100, False, -1)
     chan = channels.channel_model(
         noise_voltage=noise,
         frequency_offset=(freq_offset_hz / sample_rate) if sample_rate else 0.0,
         epsilon=1.0,
     )
     delay = blocks.delay(gr.sizeof_gr_complex, int((sample_rate * delay_ms) / 1000.0))
-    sink = zeromq.pub_sink(gr.sizeof_gr_complex, 1, sink_endpoint, 100, False, -1)
+    sink = zeromq.rep_sink(gr.sizeof_gr_complex, 1, sink_endpoint, 100, False, -1)
     tb.connect(src, chan, delay, sink)
 
 
 def run_channel(profile: dict) -> None:
+    if profile.get("profile_name") == "bypass_compat":
+        _run_dummy({**profile, "mode_hint": "direct-zmq"})
+        return
+
     if not all([blocks, channels, gr, zeromq]):
         _run_dummy(profile)
         return

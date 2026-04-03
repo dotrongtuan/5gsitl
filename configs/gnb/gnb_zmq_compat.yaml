@@ -1,10 +1,12 @@
 gnb_id: 411
+gnb_id_bit_length: 22
 ran_node_name: sitl-gnb01-compat
-amf:
-  addr: 10.10.0.10
-  port: 38412
+
 cu_cp:
   amf:
+    addr: 10.10.0.10
+    port: 38412
+    bind_addr: 10.10.0.2
     supported_tracking_areas:
       - tac: 7
         plmn_list:
@@ -12,10 +14,17 @@ cu_cp:
             tai_slice_support_list:
               - sst: 1
                 sd: "000001"
-              - sst: 1
-                sd: "000002"
-              - sst: 1
-                sd: "000003"
+  inactivity_timer: 7200
+
+cu_up:
+  ngu:
+    socket:
+      - bind_addr: 10.20.0.2
+    gtpu:
+      queue_size: 2046
+      batch_size: 256
+      reordering_timer: 0
+
 cell_cfg:
   dl_arfcn: 368500
   band: 3
@@ -31,30 +40,31 @@ cell_cfg:
     dedicated:
       ss2_type: common
       dci_format_0_1_and_1_1: false
+  pdsch:
+    mcs_table: qam64
+  pusch:
+    mcs_table: qam64
   prach:
     prach_config_index: 1
+  nof_antennas_dl: 1
+  nof_antennas_ul: 1
   slicing:
     - sst: 1
       sd: "000001"
-    - sst: 1
-      sd: "000002"
-    - sst: 1
-      sd: "000003"
+
 ru_sdr:
   device_driver: zmq
-  device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001
+  device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001,base_srate=23.04e6
   srate: 23.04
-  tx_gain: 50
-  rx_gain: 40
+  tx_gain: 75
+  rx_gain: 75
+
 log:
   filename: ./outputs/logs/gnb/gnb.log
   all_level: info
+
 pcap:
   mac_enable: true
   mac_filename: ./outputs/pcap/gnb_mac.pcap
   ngap_enable: true
   ngap_filename: ./outputs/pcap/gnb_ngap.pcap
-notes:
-  - Compatibility profile for srsUE-based SA proof-of-concept bring-up
-  - Based on official srsRAN guidance for 15 kHz SCS and FDD band operation
-  - TODO(version-check): validate keys against installed srsRAN Project package

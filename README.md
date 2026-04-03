@@ -15,6 +15,52 @@ The project provides a practical SITL harness where:
 
 No SDR, USRP, OTA, or physical RF front-end is required.
 
+Vietnamese documentation:
+
+- `docs/huong_dan_su_dung_vi.md`
+- `docs/huong_dan_thi_nghiem_va_danh_gia_vi.md`
+
+## 5-Minute Quick Start
+
+Use this path if the machine is already provisioned with Ubuntu dependencies, Open5GS, MongoDB, GNU Radio, OMNeT++, and the required srsRAN binaries.
+
+If the machine is new, run:
+
+```bash
+bash scripts/bootstrap_ubuntu_sitl.sh
+```
+
+If the environment is already installed, the fastest attach validation flow is:
+
+```bash
+source .venv/bin/activate || true
+bash scripts/run_runtime_demo.sh
+```
+
+Validate the result:
+
+```bash
+bash scripts/check_attach.sh
+cat outputs/runtime/channel_status.json
+```
+
+Expected signals:
+
+- `check_attach.sh` returns `{"attached": true, "ue_ip": "10.45.0.x"}`
+- `channel_status.json` reports `"mode": "direct-zmq"`
+
+Current known-good runtime baseline:
+
+- `configs/core/amf_compat.yaml`
+- `configs/core/smf_compat.yaml`
+- `configs/core/pcf.yaml`
+- `configs/core/subscribers_compat.yaml`
+- `configs/gnb/gnb_zmq_compat.yaml`
+- `configs/ue/ue_zmq_compat.conf`
+- `configs/channel/bypass_compat.yaml`
+
+For a Vietnamese walkthrough, see `docs/huong_dan_su_dung_vi.md`.
+
 ## Full 5G NR Scope
 
 Supported experiment categories:
@@ -115,6 +161,32 @@ Compatibility note:
 8. `bash scripts/start_capture.sh baseline`
 9. `bash scripts/run_testcase.sh testcases/latency/baseline_rtt.yaml`
 10. `bash scripts/export_results.sh`
+
+## One-Command Runtime Demo
+
+To start the stack, open OMNeT++ directly in `RuntimeView`, and run the baseline latency testcase in one shot:
+
+```bash
+bash scripts/run_runtime_demo.sh
+```
+
+To run a different testcase with the same flow:
+
+```bash
+bash scripts/run_runtime_demo.sh testcases/nr/nr_baseline_connectivity.yaml
+```
+
+The runtime demo now waits for actual UE attach evidence before running the testcase. If UE attach or routing is incomplete, the demo exits with a failure instead of silently producing synthetic-looking baseline results.
+
+For the current bootstrap compatibility path, the known-good SA attach baseline is documented in `docs/runtime_compat_attach_baseline.md`. That baseline uses:
+
+- `amf_compat.yaml`
+- `smf_compat.yaml`
+- `pcf.yaml` with MongoDB enabled
+- `subscribers_compat.yaml`
+- `gnb_zmq_compat.yaml`
+- `ue_zmq_compat.conf`
+- `bypass_compat.yaml` in `direct-zmq` mode
 
 ## Running Captures
 

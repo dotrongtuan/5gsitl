@@ -1,7 +1,11 @@
 logger:
-  file: ./outputs/logs/open5gs/ausf.log
+  file:
+    path: ./outputs/logs/open5gs/ausf.log
 ausf:
   sbi:
     server:
-      - address: 127.0.0.15
+      - address: 127.0.0.19
         port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777

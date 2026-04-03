@@ -4,6 +4,12 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
 mkdir -p "${PROJECT_ROOT}/outputs/logs/adapters"
 
+nohup env PYTHONPATH="${PROJECT_ROOT}" python3 -m tools.event_bus serve \
+  --host "${ADAPTER_HTTP_HOST:-127.0.0.1}" \
+  --port "${ADAPTER_HTTP_PORT:-18080}" \
+  > "${PROJECT_ROOT}/outputs/logs/adapters/event_bus.log" 2>&1 &
+write_pid adapter-api "$!"
+
 nohup env PYTHONPATH="${PROJECT_ROOT}" python3 -m adapters.omnetpp_state_adapter \
   > "${PROJECT_ROOT}/outputs/logs/adapters/state_adapter.log" 2>&1 &
 write_pid adapter-state "$!"
