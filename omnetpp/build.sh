@@ -14,5 +14,17 @@ set +u
 source "${OMNETPP_ROOT}/setenv"
 set -u
 
+if ! command -v opp_makemake >/dev/null 2>&1; then
+  echo "OMNeT++ tools are not built yet. Building OMNeT++ runtime first..."
+  (
+    cd "${OMNETPP_ROOT}"
+    ./configure
+    make -j"$(nproc)"
+  )
+  set +u
+  source "${OMNETPP_ROOT}/setenv"
+  set -u
+fi
+
 opp_makemake -f --deep -O out -o omnetpp_sitl
 make -j"$(nproc)" MODE=release

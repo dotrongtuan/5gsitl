@@ -136,17 +136,25 @@ install_python_env() {
 }
 
 install_omnetpp() {
-  if [[ -x "${OMNETPP_ROOT_DEFAULT}/bin/opp_run" ]]; then
+  if [[ -d "${OMNETPP_ROOT_DEFAULT}" ]]; then
     log "OMNeT++ already present at ${OMNETPP_ROOT_DEFAULT}."
-    return 0
+  else
+    log "Installing OMNeT++ ${OMNETPP_VERSION}."
+    mkdir -p "$(dirname "${OMNETPP_TARBALL}")" "$(dirname "${OMNETPP_ROOT_DEFAULT}")"
+    if [[ ! -f "${OMNETPP_TARBALL}" ]]; then
+      curl -L "${OMNETPP_DOWNLOAD_URL}" -o "${OMNETPP_TARBALL}"
+    fi
+    tar -xzf "${OMNETPP_TARBALL}" -C "$(dirname "${OMNETPP_ROOT_DEFAULT}")"
   fi
 
-  log "Installing OMNeT++ ${OMNETPP_VERSION}."
-  mkdir -p "$(dirname "${OMNETPP_TARBALL}")" "$(dirname "${OMNETPP_ROOT_DEFAULT}")"
-  if [[ ! -f "${OMNETPP_TARBALL}" ]]; then
-    curl -L "${OMNETPP_DOWNLOAD_URL}" -o "${OMNETPP_TARBALL}"
+  if [[ ! -x "${OMNETPP_ROOT_DEFAULT}/bin/opp_makemake" ]]; then
+    log "Building OMNeT++ runtime tools."
+    (
+      cd "${OMNETPP_ROOT_DEFAULT}"
+      ./configure
+      make -j"$(nproc)"
+    )
   fi
-  tar -xzf "${OMNETPP_TARBALL}" -C "$(dirname "${OMNETPP_ROOT_DEFAULT}")"
 }
 
 write_env_file() {
