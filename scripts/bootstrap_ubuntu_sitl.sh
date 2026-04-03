@@ -37,6 +37,8 @@ OMNETPP_ENABLE_OSGEARTH="${OMNETPP_ENABLE_OSGEARTH:-0}"
 PYTHON_VENV="${PROJECT_ROOT}/.venv"
 SRSRAN_PROJECT_SRC="${HOME}/src/srsRAN_Project"
 SRSRAN_4G_SRC="${HOME}/src/srsRAN_4G"
+SRSRAN_PROJECT_REF="${SRSRAN_PROJECT_REF:-release_25_04}"
+SRSRAN_4G_REF="${SRSRAN_4G_REF:-release_23_11}"
 
 cleanup_stale_srsran_ppas() {
   if [[ "$UBUNTU_CODENAME" != "noble" ]]; then
@@ -136,13 +138,14 @@ install_srsran_packages() {
 }
 
 build_srsran_project_from_source() {
-  log "Building srsRAN Project from source with ZMQ enabled."
+  log "Building srsRAN Project from source with ZMQ enabled at ref ${SRSRAN_PROJECT_REF}."
   mkdir -p "$(dirname "${SRSRAN_PROJECT_SRC}")"
   if [[ ! -d "${SRSRAN_PROJECT_SRC}/.git" ]]; then
-    git clone --depth 1 https://github.com/srsran/srsRAN_Project.git "${SRSRAN_PROJECT_SRC}"
+    git clone https://github.com/srsran/srsRAN_Project.git "${SRSRAN_PROJECT_SRC}"
   else
-    git -C "${SRSRAN_PROJECT_SRC}" pull --ff-only
+    git -C "${SRSRAN_PROJECT_SRC}" fetch --all --tags --prune
   fi
+  git -C "${SRSRAN_PROJECT_SRC}" checkout --force "${SRSRAN_PROJECT_REF}"
   cmake -S "${SRSRAN_PROJECT_SRC}" -B "${SRSRAN_PROJECT_SRC}/build" -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
   cmake --build "${SRSRAN_PROJECT_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_PROJECT_SRC}/build"
@@ -150,13 +153,14 @@ build_srsran_project_from_source() {
 }
 
 build_srsran_4g_from_source() {
-  log "Building srsRAN 4G from source for srsUE."
+  log "Building srsRAN 4G from source for srsUE at ref ${SRSRAN_4G_REF}."
   mkdir -p "$(dirname "${SRSRAN_4G_SRC}")"
   if [[ ! -d "${SRSRAN_4G_SRC}/.git" ]]; then
-    git clone --depth 1 https://github.com/srsran/srsRAN_4G.git "${SRSRAN_4G_SRC}"
+    git clone https://github.com/srsran/srsRAN_4G.git "${SRSRAN_4G_SRC}"
   else
-    git -C "${SRSRAN_4G_SRC}" pull --ff-only
+    git -C "${SRSRAN_4G_SRC}" fetch --all --tags --prune
   fi
+  git -C "${SRSRAN_4G_SRC}" checkout --force "${SRSRAN_4G_REF}"
   cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
   cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"
