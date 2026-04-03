@@ -39,7 +39,7 @@ def _write_status(profile: dict, mode: str) -> None:
 
 def _run_dummy(profile: dict) -> None:
     flag = _install_signal_handlers()
-    _write_status(profile, "dummy")
+    _write_status(profile, str(profile.get("mode_hint", "dummy")))
     while not flag.stopped:
         time.sleep(1.0)
 
@@ -95,6 +95,10 @@ def _build_direction(tb: "gr.top_block", source_endpoint: str, sink_endpoint: st
 
 
 def run_channel(profile: dict) -> None:
+    if profile.get("profile_name") == "bypass_compat":
+        _run_dummy({**profile, "mode_hint": "direct-zmq"})
+        return
+
     if (
         not profile.get("awgn_enabled")
         and not profile.get("fading_enabled")
