@@ -26,3 +26,4 @@
 - check `outputs/runtime/omnetpp.env`
 - ensure the adapter processes are running
 - rebuild the OMNeT++ library after source changes
+- if `./configure` fails on OpenSceneGraph, install `libopenscenegraph-dev` and rerun the bootstrap or `./configure`
