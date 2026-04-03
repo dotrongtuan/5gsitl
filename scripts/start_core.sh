@@ -39,7 +39,7 @@ if is_compat_profile; then
   [[ -z "${OPEN5GS_AMF_CONFIG:-}" ]] && AMF_CONFIG="${PROJECT_ROOT}/configs/core/amf_compat.yaml"
   [[ -z "${OPEN5GS_SMF_CONFIG:-}" ]] && SMF_CONFIG="${PROJECT_ROOT}/configs/core/smf_compat.yaml"
   [[ -z "${OPEN5GS_SUBSCRIBERS_FILE:-}" ]] && SUBSCRIBERS_FILE="${PROJECT_ROOT}/configs/core/subscribers_compat.yaml"
-  ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-0}"
+  ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-1}"
   ENABLE_NSSF="${OPEN5GS_ENABLE_NSSF:-0}"
   STRICT_SUBSCRIBER_PROVISIONING="${OPEN5GS_STRICT_SUBSCRIBER_PROVISIONING:-1}"
   log "Using compatibility Open5GS core profile."
