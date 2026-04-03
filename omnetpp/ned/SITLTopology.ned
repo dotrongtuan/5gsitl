@@ -1,8 +1,3 @@
-package sitl;
-
-import sitl.ExternalStateBridge;
-import sitl.VisualNode;
-
 network SITLTopology
 {
     parameters:
