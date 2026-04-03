@@ -34,5 +34,10 @@ amf:
   network_name:
     full: 5G NR SITL
   amf_name: sitl-amf0
+  time:
+    t3502:
+      value: 720
+    t3512:
+      value: 540
 notes:
   - TODO(version-check): confirm AMF key names for installed Open5GS release

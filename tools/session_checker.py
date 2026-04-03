@@ -6,23 +6,23 @@ import os
 from tools.common import runtime_dir
 
 FALLBACK_PROCESS_NAMES = {
-    "amf": "open5gs-amfd",
-    "ausf": "open5gs-ausfd",
-    "gnb": "gnb",
-    "nrf": "open5gs-nrfd",
-    "nssf": "open5gs-nssfd",
-    "omnetpp": "opp_run",
-    "pcf": "open5gs-pcfd",
-    "smf": "open5gs-smfd",
-    "udm": "open5gs-udmd",
-    "udr": "open5gs-udrd",
-    "ue": "srsue",
-    "upf": "open5gs-upfd",
+    "amf": ["open5gs-amfd"],
+    "ausf": ["open5gs-ausfd"],
+    "gnb": ["gnb"],
+    "nrf": ["open5gs-nrfd"],
+    "nssf": ["open5gs-nssfd"],
+    "omnetpp": ["opp_run", "omnetpp_sitl"],
+    "pcf": ["open5gs-pcfd"],
+    "smf": ["open5gs-smfd"],
+    "udm": ["open5gs-udmd"],
+    "udr": ["open5gs-udrd"],
+    "ue": ["srsue"],
+    "upf": ["open5gs-upfd"],
 }
 
 
-def process_exists(name: str) -> bool:
-    return os.system(f'pgrep -x "{name}" > /dev/null 2>&1') == 0
+def process_exists(names: list[str]) -> bool:
+    return any(os.system(f'pgrep -x "{name}" > /dev/null 2>&1') == 0 for name in names)
 
 
 def main() -> None:
@@ -37,8 +37,8 @@ def main() -> None:
             except PermissionError:
                 summary[pid_file.stem] = "running"
             except Exception:
-                fallback_name = FALLBACK_PROCESS_NAMES.get(pid_file.stem)
-                summary[pid_file.stem] = "running" if fallback_name and process_exists(fallback_name) else "stale"
+                fallback_names = FALLBACK_PROCESS_NAMES.get(pid_file.stem)
+                summary[pid_file.stem] = "running" if fallback_names and process_exists(fallback_names) else "stale"
     print(json.dumps(summary, indent=2, sort_keys=True))
 
 

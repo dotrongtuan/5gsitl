@@ -63,8 +63,3 @@ pcap:
   mac_filename: ./outputs/pcap/gnb_mac.pcap
   ngap_enable: true
   ngap_filename: ./outputs/pcap/gnb_ngap.pcap
-
-notes:
-  - Compatibility profile updated to current srsRAN Project YAML schema
-  - Based on official srsRAN Project configuration reference
-  - TODO(version-check): validate exact keys against installed srsRAN Project build
