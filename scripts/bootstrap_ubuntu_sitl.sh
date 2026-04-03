@@ -20,6 +20,11 @@ if [[ "$UBUNTU_CODENAME" != "jammy" && "$UBUNTU_CODENAME" != "noble" ]]; then
   die "Unsupported Ubuntu release: ${VERSION_ID:-unknown}. Use 22.04 or 24.04."
 fi
 
+if [[ "$UBUNTU_CODENAME" == "noble" ]]; then
+  log "WARNING: Open5GS package-manager installation is documented most clearly for Ubuntu 22.04 (Jammy)."
+  log "WARNING: Ubuntu 24.04 (Noble) may still work, but if package resolution fails, prefer Ubuntu 22.04 or add a source-build fallback."
+fi
+
 DEBIAN_FRONTEND=noninteractive
 export DEBIAN_FRONTEND
 
@@ -56,6 +61,7 @@ install_mongodb() {
     sudo_if_needed tee /etc/apt/sources.list.d/mongodb-org-8.0.list >/dev/null
   sudo_if_needed apt-get update
   sudo_if_needed apt-get install -y mongodb-org mongodb-mongosh
+  sudo_if_needed apt-get install -y --fix-broken || true
   sudo_if_needed systemctl enable mongod
   sudo_if_needed systemctl start mongod
 }
@@ -136,8 +142,8 @@ start_stack_if_requested() {
 }
 
 install_base_packages
-install_open5gs
 install_mongodb
+install_open5gs
 install_srsran_packages
 install_python_env
 install_omnetpp
