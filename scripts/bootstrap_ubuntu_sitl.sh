@@ -269,7 +269,7 @@ run_post_install_setup() {
   bash "${PROJECT_ROOT}/scripts/setup_host_network.sh"
   PATH="${PYTHON_VENV}/bin:${PATH}" PYTHONPATH="${PROJECT_ROOT}" \
     python3 -m tools.provision_subscribers \
-    --subscribers "${PROJECT_ROOT}/configs/core/subscribers.yaml" \
+    --subscribers "${PROJECT_ROOT}/configs/core/subscribers_compat.yaml" \
     --db-uri "mongodb://127.0.0.1/open5gs"
 }
 

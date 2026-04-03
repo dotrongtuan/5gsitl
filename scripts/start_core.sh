@@ -33,6 +33,7 @@ NSSF_CONFIG="${OPEN5GS_NSSF_CONFIG:-${PROJECT_ROOT}/configs/core/nssf.yaml}"
 SUBSCRIBERS_FILE="${OPEN5GS_SUBSCRIBERS_FILE:-${PROJECT_ROOT}/configs/core/subscribers.yaml}"
 ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-1}"
 ENABLE_NSSF="${OPEN5GS_ENABLE_NSSF:-1}"
+STRICT_SUBSCRIBER_PROVISIONING="${OPEN5GS_STRICT_SUBSCRIBER_PROVISIONING:-0}"
 
 if is_compat_profile; then
   [[ -z "${OPEN5GS_AMF_CONFIG:-}" ]] && AMF_CONFIG="${PROJECT_ROOT}/configs/core/amf_compat.yaml"
@@ -40,6 +41,7 @@ if is_compat_profile; then
   [[ -z "${OPEN5GS_SUBSCRIBERS_FILE:-}" ]] && SUBSCRIBERS_FILE="${PROJECT_ROOT}/configs/core/subscribers_compat.yaml"
   ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-0}"
   ENABLE_NSSF="${OPEN5GS_ENABLE_NSSF:-0}"
+  STRICT_SUBSCRIBER_PROVISIONING="${OPEN5GS_STRICT_SUBSCRIBER_PROVISIONING:-1}"
   log "Using compatibility Open5GS core profile."
 fi
 
@@ -91,13 +93,19 @@ start_mongodb() {
 }
 
 mkdir -p "${PROJECT_ROOT}/outputs/logs/open5gs"
+rm -f "${PROJECT_ROOT}/outputs/logs/open5gs/"*.log "${PROJECT_ROOT}/outputs/logs/open5gs/"*.stdout.log 2>/dev/null || true
 stop_packaged_open5gs_services
 stop_existing_open5gs_processes
 start_mongodb
 
+log "Open5GS config selection: AMF=${AMF_CONFIG} SMF=${SMF_CONFIG} SUBSCRIBERS=${SUBSCRIBERS_FILE} PCF=${ENABLE_PCF} NSSF=${ENABLE_NSSF}"
+
 if ! PYTHONPATH="${PROJECT_ROOT}" python3 -m tools.provision_subscribers \
   --subscribers "${SUBSCRIBERS_FILE}" \
   --db-uri "${MONGODB_URI:-mongodb://127.0.0.1/open5gs}"; then
+  if [[ "${STRICT_SUBSCRIBER_PROVISIONING}" == "1" ]]; then
+    die "Subscriber provisioning failed for the selected Open5GS profile."
+  fi
   log "WARNING: subscriber provisioning failed. Continuing with existing MongoDB data."
 fi
 
