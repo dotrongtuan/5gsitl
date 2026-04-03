@@ -95,10 +95,6 @@ def _build_direction(tb: "gr.top_block", source_endpoint: str, sink_endpoint: st
 
 
 def run_channel(profile: dict) -> None:
-    if profile.get("profile_name") == "bypass_compat":
-        _run_dummy({**profile, "mode_hint": "direct-zmq"})
-        return
-
     if (
         not profile.get("awgn_enabled")
         and not profile.get("fading_enabled")
