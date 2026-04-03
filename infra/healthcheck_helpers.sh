@@ -16,3 +16,8 @@ check_process_name() {
   local name="$1"
   pgrep -x "$name" >/dev/null 2>&1
 }
+
+check_socket_listener() {
+  local pattern="$1"
+  ss -lnH 2>/dev/null | grep -q "$pattern"
+}

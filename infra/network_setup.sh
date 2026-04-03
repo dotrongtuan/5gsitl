@@ -4,6 +4,7 @@ set -euo pipefail
 sudo ip link add sitl_n2 type dummy 2>/dev/null || true
 sudo ip link add sitl_n3 type dummy 2>/dev/null || true
 sudo ip addr add 10.10.0.10/24 dev sitl_n2 2>/dev/null || true
+sudo ip addr add 10.10.0.2/24 dev sitl_n2 2>/dev/null || true
 sudo ip addr add 10.20.0.1/24 dev sitl_n3 2>/dev/null || true
 sudo ip addr add 10.20.0.2/24 dev sitl_n3 2>/dev/null || true
 sudo ip link set sitl_n2 up

@@ -10,5 +10,5 @@ check_process_name gnb && log "gNB process running" || log "gNB process missing"
 check_process_name srsue && log "UE process running" || log "UE process missing"
 
 check_port 127.0.0.10 7777 && log "NRF SBI reachable" || log "NRF SBI not reachable"
-check_port 10.10.0.10 38412 && log "AMF NGAP reachable" || log "AMF NGAP not reachable"
+check_socket_listener '10.10.0.10:38412' && log "AMF NGAP reachable" || log "AMF NGAP not reachable"
 check_port 127.0.0.1 "${ADAPTER_HTTP_PORT:-18080}" && log "Adapter HTTP reachable" || log "Adapter HTTP not reachable"
