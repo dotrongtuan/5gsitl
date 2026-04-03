@@ -116,6 +116,20 @@ Compatibility note:
 9. `bash scripts/run_testcase.sh testcases/latency/baseline_rtt.yaml`
 10. `bash scripts/export_results.sh`
 
+## One-Command Runtime Demo
+
+To start the stack, open OMNeT++ directly in `RuntimeView`, and run the baseline latency testcase in one shot:
+
+```bash
+bash scripts/run_runtime_demo.sh
+```
+
+To run a different testcase with the same flow:
+
+```bash
+bash scripts/run_runtime_demo.sh testcases/nr/nr_baseline_connectivity.yaml
+```
+
 ## Running Captures
 
 - all-in-one capture: `bash scripts/start_capture.sh testcase-name`
