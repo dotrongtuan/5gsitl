@@ -1,0 +1,37 @@
+logger:
+  file:
+    path: ./outputs/logs/open5gs/smf.log
+smf:
+  sbi:
+    server:
+      - address: 127.0.0.12
+        port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777
+  pfcp:
+    server:
+      - address: 127.0.0.12
+    client:
+      upf:
+        - address: 127.0.0.13
+  gtpc:
+    server:
+      - address: 127.0.0.12
+  gtpu:
+    server:
+      - address: 127.0.0.12
+  metrics:
+    server:
+      - address: 127.0.0.12
+        port: 9092
+  session:
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
+      dnn: internet
+      dev: ogstun
+  dns:
+    - 8.8.8.8
+    - 1.1.1.1
+notes:
+  - Compatibility SMF profile omits unsupported s_nssai keys for Open5GS v2.7.7.

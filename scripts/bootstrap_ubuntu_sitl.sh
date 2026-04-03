@@ -242,7 +242,11 @@ write_env_file() {
     -e "s#^PROJECT_ROOT=.*#PROJECT_ROOT=${PROJECT_ROOT}#" \
     -e "s#^OMNETPP_ROOT=.*#OMNETPP_ROOT=${OMNETPP_ROOT_DEFAULT}#" \
     -e "s#^OPEN5GS_CONFIG_DIR=.*#OPEN5GS_CONFIG_DIR=${PROJECT_ROOT}/configs/core#" \
-    -e "s#^OPEN5GS_SUBSCRIBERS_FILE=.*#OPEN5GS_SUBSCRIBERS_FILE=${PROJECT_ROOT}/configs/core/subscribers.yaml#" \
+    -e "s#^OPEN5GS_SUBSCRIBERS_FILE=.*#OPEN5GS_SUBSCRIBERS_FILE=${PROJECT_ROOT}/configs/core/subscribers_compat.yaml#" \
+    -e "s#^OPEN5GS_AMF_CONFIG=.*#OPEN5GS_AMF_CONFIG=${PROJECT_ROOT}/configs/core/amf_compat.yaml#" \
+    -e "s#^OPEN5GS_SMF_CONFIG=.*#OPEN5GS_SMF_CONFIG=${PROJECT_ROOT}/configs/core/smf_compat.yaml#" \
+    -e "s#^OPEN5GS_ENABLE_PCF=.*#OPEN5GS_ENABLE_PCF=0#" \
+    -e "s#^OPEN5GS_ENABLE_NSSF=.*#OPEN5GS_ENABLE_NSSF=0#" \
     -e "s#^SRSRAN_GNB_CONFIG=.*#SRSRAN_GNB_CONFIG=${PROJECT_ROOT}/configs/gnb/gnb_zmq_compat.yaml#" \
     -e "s#^SRSRAN_UE_CONFIG=.*#SRSRAN_UE_CONFIG=${PROJECT_ROOT}/configs/ue/ue_zmq_compat.conf#" \
     -e "s#^GNURADIO_CHANNEL_PROFILE=.*#GNURADIO_CHANNEL_PROFILE=${PROJECT_ROOT}/configs/channel/bypass_compat.yaml#" \

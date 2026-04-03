@@ -11,6 +11,38 @@ require_bin open5gs-ausfd
 require_bin open5gs-udmd
 require_bin open5gs-udrd
 
+is_compat_profile() {
+  case "${SRSRAN_UE_CONFIG:-}" in
+    *"/configs/ue/ue_zmq_compat.conf"|*"\\configs\\ue\\ue_zmq_compat.conf") return 0 ;;
+  esac
+  case "${SRSRAN_GNB_CONFIG:-}" in
+    *"/configs/gnb/gnb_zmq_compat.yaml"|*"\\configs\\gnb\\gnb_zmq_compat.yaml") return 0 ;;
+  esac
+  return 1
+}
+
+NRF_CONFIG="${OPEN5GS_NRF_CONFIG:-${PROJECT_ROOT}/configs/core/nrf.yaml}"
+AMF_CONFIG="${OPEN5GS_AMF_CONFIG:-${PROJECT_ROOT}/configs/core/amf.yaml}"
+SMF_CONFIG="${OPEN5GS_SMF_CONFIG:-${PROJECT_ROOT}/configs/core/smf.yaml}"
+UPF_CONFIG="${OPEN5GS_UPF_CONFIG:-${PROJECT_ROOT}/configs/core/upf.yaml}"
+AUSF_CONFIG="${OPEN5GS_AUSF_CONFIG:-${PROJECT_ROOT}/configs/core/ausf.yaml}"
+UDM_CONFIG="${OPEN5GS_UDM_CONFIG:-${PROJECT_ROOT}/configs/core/udm.yaml}"
+UDR_CONFIG="${OPEN5GS_UDR_CONFIG:-${PROJECT_ROOT}/configs/core/udr.yaml}"
+PCF_CONFIG="${OPEN5GS_PCF_CONFIG:-${PROJECT_ROOT}/configs/core/pcf.yaml}"
+NSSF_CONFIG="${OPEN5GS_NSSF_CONFIG:-${PROJECT_ROOT}/configs/core/nssf.yaml}"
+SUBSCRIBERS_FILE="${OPEN5GS_SUBSCRIBERS_FILE:-${PROJECT_ROOT}/configs/core/subscribers.yaml}"
+ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-1}"
+ENABLE_NSSF="${OPEN5GS_ENABLE_NSSF:-1}"
+
+if is_compat_profile; then
+  [[ -z "${OPEN5GS_AMF_CONFIG:-}" ]] && AMF_CONFIG="${PROJECT_ROOT}/configs/core/amf_compat.yaml"
+  [[ -z "${OPEN5GS_SMF_CONFIG:-}" ]] && SMF_CONFIG="${PROJECT_ROOT}/configs/core/smf_compat.yaml"
+  [[ -z "${OPEN5GS_SUBSCRIBERS_FILE:-}" ]] && SUBSCRIBERS_FILE="${PROJECT_ROOT}/configs/core/subscribers_compat.yaml"
+  ENABLE_PCF="${OPEN5GS_ENABLE_PCF:-0}"
+  ENABLE_NSSF="${OPEN5GS_ENABLE_NSSF:-0}"
+  log "Using compatibility Open5GS core profile."
+fi
+
 stop_packaged_open5gs_services() {
   if ! command -v systemctl >/dev/null 2>&1; then
     return 0
@@ -64,41 +96,41 @@ stop_existing_open5gs_processes
 start_mongodb
 
 if ! PYTHONPATH="${PROJECT_ROOT}" python3 -m tools.provision_subscribers \
-  --subscribers "${OPEN5GS_SUBSCRIBERS_FILE:-${PROJECT_ROOT}/configs/core/subscribers.yaml}" \
+  --subscribers "${SUBSCRIBERS_FILE}" \
   --db-uri "${MONGODB_URI:-mongodb://127.0.0.1/open5gs}"; then
   log "WARNING: subscriber provisioning failed. Continuing with existing MongoDB data."
 fi
 
-nohup open5gs-nrfd -c "${PROJECT_ROOT}/configs/core/nrf.yaml" \
+nohup open5gs-nrfd -c "${NRF_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/nrf.stdout.log" 2>&1 &
 write_pid nrf "$!"
-nohup open5gs-amfd -c "${PROJECT_ROOT}/configs/core/amf.yaml" \
+nohup open5gs-amfd -c "${AMF_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/amf.stdout.log" 2>&1 &
 write_pid amf "$!"
-nohup open5gs-smfd -c "${PROJECT_ROOT}/configs/core/smf.yaml" \
+nohup open5gs-smfd -c "${SMF_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/smf.stdout.log" 2>&1 &
 write_pid smf "$!"
-nohup open5gs-upfd -c "${PROJECT_ROOT}/configs/core/upf.yaml" \
+nohup open5gs-upfd -c "${UPF_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/upf.stdout.log" 2>&1 &
 write_pid upf "$!"
-nohup open5gs-ausfd -c "${PROJECT_ROOT}/configs/core/ausf.yaml" \
+nohup open5gs-ausfd -c "${AUSF_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/ausf.stdout.log" 2>&1 &
 write_pid ausf "$!"
-nohup open5gs-udmd -c "${PROJECT_ROOT}/configs/core/udm.yaml" \
+nohup open5gs-udmd -c "${UDM_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/udm.stdout.log" 2>&1 &
 write_pid udm "$!"
-nohup open5gs-udrd -c "${PROJECT_ROOT}/configs/core/udr.yaml" \
+nohup open5gs-udrd -c "${UDR_CONFIG}" \
   > "${PROJECT_ROOT}/outputs/logs/open5gs/udr.stdout.log" 2>&1 &
 write_pid udr "$!"
 
-if command -v open5gs-pcfd >/dev/null 2>&1; then
-  nohup open5gs-pcfd -c "${PROJECT_ROOT}/configs/core/pcf.yaml" \
+if [[ "${ENABLE_PCF}" == "1" ]] && command -v open5gs-pcfd >/dev/null 2>&1; then
+  nohup open5gs-pcfd -c "${PCF_CONFIG}" \
     > "${PROJECT_ROOT}/outputs/logs/open5gs/pcf.stdout.log" 2>&1 &
   write_pid pcf "$!"
 fi
 
-if command -v open5gs-nssfd >/dev/null 2>&1; then
-  nohup open5gs-nssfd -c "${PROJECT_ROOT}/configs/core/nssf.yaml" \
+if [[ "${ENABLE_NSSF}" == "1" ]] && command -v open5gs-nssfd >/dev/null 2>&1; then
+  nohup open5gs-nssfd -c "${NSSF_CONFIG}" \
     > "${PROJECT_ROOT}/outputs/logs/open5gs/nssf.stdout.log" 2>&1 &
   write_pid nssf "$!"
 fi
