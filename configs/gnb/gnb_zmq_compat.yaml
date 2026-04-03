@@ -44,6 +44,10 @@ cell_cfg:
     dedicated:
       ss2_type: common
       dci_format_0_1_and_1_1: false
+  pdsch:
+    mcs_table: qam64
+  pusch:
+    mcs_table: qam64
   prach:
     prach_config_index: 1
     total_nof_ra_preambles: 64
