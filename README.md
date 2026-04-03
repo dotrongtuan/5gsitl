@@ -19,6 +19,47 @@ Vietnamese documentation:
 
 - `docs/huong_dan_su_dung_vi.md`
 
+## 5-Minute Quick Start
+
+Use this path if the machine is already provisioned with Ubuntu dependencies, Open5GS, MongoDB, GNU Radio, OMNeT++, and the required srsRAN binaries.
+
+If the machine is new, run:
+
+```bash
+bash scripts/bootstrap_ubuntu_sitl.sh
+```
+
+If the environment is already installed, the fastest attach validation flow is:
+
+```bash
+source .venv/bin/activate || true
+bash scripts/run_runtime_demo.sh
+```
+
+Validate the result:
+
+```bash
+bash scripts/check_attach.sh
+cat outputs/runtime/channel_status.json
+```
+
+Expected signals:
+
+- `check_attach.sh` returns `{"attached": true, "ue_ip": "10.45.0.x"}`
+- `channel_status.json` reports `"mode": "direct-zmq"`
+
+Current known-good runtime baseline:
+
+- `configs/core/amf_compat.yaml`
+- `configs/core/smf_compat.yaml`
+- `configs/core/pcf.yaml`
+- `configs/core/subscribers_compat.yaml`
+- `configs/gnb/gnb_zmq_compat.yaml`
+- `configs/ue/ue_zmq_compat.conf`
+- `configs/channel/bypass_compat.yaml`
+
+For a Vietnamese walkthrough, see `docs/huong_dan_su_dung_vi.md`.
+
 ## Full 5G NR Scope
 
 Supported experiment categories:
