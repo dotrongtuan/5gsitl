@@ -2,11 +2,21 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+    import msvcrt
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -39,14 +49,29 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
     return data
 
 
-def dump_json(path: str | Path, payload: Any) -> Path:
+def _atomic_write(path: str | Path, writer: Callable[[TextIOWrapper], None]) -> Path:
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    tmp = out.with_suffix(out.suffix + ".tmp")
-    with tmp.open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, sort_keys=True)
-    tmp.replace(out)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{out.name}.", suffix=".tmp", dir=out.parent)
+    tmp = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            writer(handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, out)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
     return out
+
+
+def dump_json(path: str | Path, payload: Any) -> Path:
+    return _atomic_write(path, lambda handle: json.dump(payload, handle, indent=2, sort_keys=True))
+
+
+def dump_text(path: str | Path, content: str) -> Path:
+    return _atomic_write(path, lambda handle: handle.write(content))
 
 
 def load_json(path: str | Path, default: Any) -> Any:
@@ -69,6 +94,51 @@ def append_jsonl(path: str | Path, record: dict[str, Any]) -> None:
 
 def env_path(name: str, fallback: str) -> Path:
     return Path(os.environ.get(name, str(ROOT / fallback)))
+
+
+def runtime_state_paths() -> tuple[Path, Path]:
+    return (
+        env_path("STATE_FILE", "outputs/runtime/state.json"),
+        env_path("STATE_ENV_FILE", "outputs/runtime/omnetpp.env"),
+    )
+
+
+def runtime_state_lock_path(state_file: Path | None = None) -> Path:
+    resolved_state_file = state_file or runtime_state_paths()[0]
+    fallback = resolved_state_file.with_name(f"{resolved_state_file.name}.lock")
+    return Path(os.environ.get("STATE_LOCK_FILE", str(fallback)))
+
+
+def _acquire_lock(handle: Any) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        return
+    handle.seek(0, os.SEEK_END)
+    if handle.tell() == 0:
+        handle.write(b"\0")
+        handle.flush()
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+
+
+def _release_lock(handle: Any) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+
+
+@contextmanager
+def file_lock(path: str | Path) -> Iterator[None]:
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a+b") as handle:
+        _acquire_lock(handle)
+        try:
+            yield
+        finally:
+            _release_lock(handle)
 
 
 def default_runtime_state() -> dict[str, Any]:
@@ -103,7 +173,7 @@ def default_runtime_state() -> dict[str, Any]:
 
 
 def load_runtime_state() -> dict[str, Any]:
-    path = env_path("STATE_FILE", "outputs/runtime/state.json")
+    path = runtime_state_paths()[0]
     return load_json(path, default_runtime_state())
 
 
@@ -134,35 +204,74 @@ def flatten_state(state: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def save_runtime_state(state: dict[str, Any]) -> Path:
+def _save_runtime_state_locked(state: dict[str, Any], state_file: Path, env_file: Path) -> Path:
     state["updated_at"] = now_iso()
-    state_file = env_path("STATE_FILE", "outputs/runtime/state.json")
-    env_file = env_path("STATE_ENV_FILE", "outputs/runtime/omnetpp.env")
     dump_json(state_file, state)
-    env_file.write_text(flatten_state(state), encoding="utf-8")
+    dump_text(env_file, flatten_state(state))
     return state_file
 
 
+def mutate_runtime_state(mutator: Callable[[dict[str, Any]], None]) -> dict[str, Any]:
+    state_file, env_file = runtime_state_paths()
+    with file_lock(runtime_state_lock_path(state_file)):
+        state = load_json(state_file, default_runtime_state())
+        mutator(state)
+        _save_runtime_state_locked(state, state_file, env_file)
+        return state
+
+
+def save_runtime_state(state: dict[str, Any]) -> Path:
+    state_file, env_file = runtime_state_paths()
+    with file_lock(runtime_state_lock_path(state_file)):
+        return _save_runtime_state_locked(state, state_file, env_file)
+
+
 def update_runtime_state(*, component: str | None = None, state_value: str | None = None, **fields: Any) -> dict[str, Any]:
-    state = load_runtime_state()
-    if component:
+    def apply(state: dict[str, Any]) -> None:
+        if component:
+            if component == "all":
+                for key in state["components"]:
+                    state["components"][key] = state_value or state["components"][key]
+            else:
+                state["components"][component] = state_value or state["components"].get(component, "unknown")
+        for key, value in fields.items():
+            if value is not None:
+                state[key] = value
+
+    return mutate_runtime_state(apply)
+
+
+def record_event(kind: str, message: str, **payload: Any) -> None:
+    entry = {"ts": now_iso(), "kind": kind, "message": message, "payload": payload}
+    event_log = env_path("EVENT_LOG", "outputs/runtime/events.jsonl")
+
+    def apply(state: dict[str, Any]) -> None:
+        append_jsonl(event_log, entry)
+        recent = state.get("recent_events", [])
+        recent.append(entry)
+        state["recent_events"] = recent[-20:]
+
+    mutate_runtime_state(apply)
+
+
+def set_component_state(component: str, state_value: str) -> dict[str, Any]:
+    entry = {
+        "ts": now_iso(),
+        "kind": "component.state",
+        "message": f"{component} -> {state_value}",
+        "payload": {"component": component, "state": state_value},
+    }
+    event_log = env_path("EVENT_LOG", "outputs/runtime/events.jsonl")
+
+    def apply(state: dict[str, Any]) -> None:
         if component == "all":
             for key in state["components"]:
                 state["components"][key] = state_value or state["components"][key]
         else:
             state["components"][component] = state_value or state["components"].get(component, "unknown")
-    for key, value in fields.items():
-        if value is not None:
-            state[key] = value
-    save_runtime_state(state)
-    return state
+        append_jsonl(event_log, entry)
+        recent = state.get("recent_events", [])
+        recent.append(entry)
+        state["recent_events"] = recent[-20:]
 
-
-def record_event(kind: str, message: str, **payload: Any) -> None:
-    entry = {"ts": now_iso(), "kind": kind, "message": message, "payload": payload}
-    append_jsonl(env_path("EVENT_LOG", "outputs/runtime/events.jsonl"), entry)
-    state = load_runtime_state()
-    recent = state.get("recent_events", [])
-    recent.append(entry)
-    state["recent_events"] = recent[-20:]
-    save_runtime_state(state)
+    return mutate_runtime_state(apply)
