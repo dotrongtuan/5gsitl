@@ -130,6 +130,8 @@ To run a different testcase with the same flow:
 bash scripts/run_runtime_demo.sh testcases/nr/nr_baseline_connectivity.yaml
 ```
 
+The runtime demo now waits for actual UE attach evidence before running the testcase. If UE attach or routing is incomplete, the demo exits with a failure instead of silently producing synthetic-looking baseline results.
+
 ## Running Captures
 
 - all-in-one capture: `bash scripts/start_capture.sh testcase-name`

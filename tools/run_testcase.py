@@ -27,6 +27,10 @@ REQUIRED = {
 RTT_RE = re.compile(r"time=(?P<rtt>[0-9.]+)\s*ms")
 
 
+class TrafficExecutionError(RuntimeError):
+    """Raised when a testcase requests real traffic but no real measurement is obtained."""
+
+
 def resolve_project_path(value: str) -> Path:
     path = Path(value)
     return path if path.is_absolute() else project_root() / value
@@ -57,7 +61,7 @@ def synthetic_metrics(scenario_class: str) -> dict[str, float]:
 def parse_ping(output: str) -> dict[str, float]:
     samples = [float(match.group("rtt")) for match in RTT_RE.finditer(output)]
     if not samples:
-        return synthetic_metrics("latency")
+        raise TrafficExecutionError("Ping completed without RTT samples. UE attach or routing is likely incomplete.")
     ordered = sorted(samples)
     return {
         "current_rtt_ms": round(samples[-1], 3),
@@ -81,12 +85,18 @@ def maybe_run_traffic(case: dict[str, Any]) -> dict[str, float]:
                 capture_output=True,
                 text=True,
             )
+            if result.returncode != 0:
+                raise TrafficExecutionError(result.stdout + result.stderr)
             return parse_ping(result.stdout + result.stderr)
         if mode == "udp-latency":
-            subprocess.run(
+            result = subprocess.run(
                 ["bash", str(project_root() / "scripts" / "run_udp_latency_test.sh"), str(case["traffic_config"].get("target", "10.45.0.1")), str(case["traffic_config"].get("duration_s", 10)), str(case["traffic_config"].get("bitrate", "5M"))],
                 check=False,
+                capture_output=True,
+                text=True,
             )
+            if result.returncode != 0:
+                raise TrafficExecutionError(result.stdout + result.stderr)
         return synthetic_metrics(case["scenario_class"])
     except FileNotFoundError:
         return synthetic_metrics(case["scenario_class"])
@@ -156,27 +166,45 @@ def execute_testcase(path: str, slice_override: str | None = None) -> Path:
     )
     record_event("testcase.start", f"Started testcase {case['name']}", path=path)
 
-    metrics = maybe_run_traffic(case)
-    dump_json(outputs_dir("runtime") / "metrics.json", metrics)
-    report = write_reports(
-        case,
-        metrics,
-        channel_data.get("profile_name", channel_profile.stem),
-        slice_profile.stem if slice_profile else "",
-    )
-
-    if capture_enabled:
-        run_optional_command(["bash", str(project_root() / "scripts" / "stop_capture.sh")])
-
-    update_runtime_state(
-        metrics=metrics,
-        attach_state="attached",
-        ue_ip=case["traffic_config"].get("ue_ip", "10.45.0.2"),
-        component="capture",
-        state_value="idle",
-    )
-    record_event("testcase.stop", f"Completed testcase {case['name']}", report=str(report))
-    return report
+    report: Path | None = None
+    try:
+        metrics = maybe_run_traffic(case)
+        dump_json(outputs_dir("runtime") / "metrics.json", metrics)
+        report = write_reports(
+            case,
+            metrics,
+            channel_data.get("profile_name", channel_profile.stem),
+            slice_profile.stem if slice_profile else "",
+        )
+        update_runtime_state(
+            metrics=metrics,
+            attach_state="attached",
+            ue_ip=case["traffic_config"].get("ue_ip", "10.45.0.2"),
+            component="capture",
+            state_value="idle",
+        )
+        record_event("testcase.stop", f"Completed testcase {case['name']}", report=str(report))
+        return report
+    except TrafficExecutionError as exc:
+        update_runtime_state(
+            attach_state="failed",
+            component="capture",
+            state_value="idle",
+        )
+        record_event("testcase.error", f"Traffic execution failed for testcase {case['name']}", error=str(exc))
+        failure_report = dump_json(
+            outputs_dir("reports") / f"{case['name']}.error.json",
+            {
+                "testcase": case,
+                "error": str(exc),
+                "channel_profile": channel_data.get("profile_name", channel_profile.stem),
+                "slice_profile": slice_profile.stem if slice_profile else "",
+            },
+        )
+        return failure_report
+    finally:
+        if capture_enabled:
+            run_optional_command(["bash", str(project_root() / "scripts" / "stop_capture.sh")])
 
 
 def main() -> None:

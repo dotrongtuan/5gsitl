@@ -21,6 +21,12 @@ if [[ -n "${OMNETPP_ROOT:-}" && -d "${OMNETPP_ROOT:-}" ]]; then
 fi
 
 sleep 2
+if ! bash "${PROJECT_ROOT}/scripts/check_attach.sh" "${ATTACH_TIMEOUT_S:-45}" "${ATTACH_GATEWAY:-10.45.0.1}" "${ATTACH_IFACE:-tun_srsue}"; then
+  log "UE attach check failed; skipping testcase run."
+  bash "${PROJECT_ROOT}/scripts/healthcheck.sh" || true
+  exit 1
+fi
+
 bash "${PROJECT_ROOT}/scripts/run_testcase.sh" "${TESTCASE}"
 bash "${PROJECT_ROOT}/scripts/healthcheck.sh" || true
 
