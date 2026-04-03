@@ -151,6 +151,9 @@ install_omnetpp() {
     log "Building OMNeT++ runtime tools."
     (
       cd "${OMNETPP_ROOT_DEFAULT}"
+      set +u
+      source ./setenv
+      set -u
       ./configure
       make -j"$(nproc)"
     )
