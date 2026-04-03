@@ -174,7 +174,17 @@ build_srsran_4g_from_source() {
   fi
   git -C "${SRSRAN_4G_SRC}" checkout --force "${SRSRAN_4G_REF}"
   relax_srsran_4g_werror "${SRSRAN_4G_SRC}"
-  cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build"
+  cmake -S "${SRSRAN_4G_SRC}" -B "${SRSRAN_4G_SRC}/build" \
+    -DENABLE_WERROR=OFF \
+    -DENABLE_SRSENB=OFF \
+    -DENABLE_SRSEPC=OFF \
+    -DENABLE_GUI=OFF \
+    -DENABLE_UHD=OFF \
+    -DENABLE_BLADERF=OFF \
+    -DENABLE_SOAPYSDR=OFF \
+    -DENABLE_SKIQ=OFF \
+    -DENABLE_HARDSIM=OFF \
+    -DENABLE_ZEROMQ=ON
   cmake --build "${SRSRAN_4G_SRC}/build" -j"$(nproc)"
   sudo_if_needed cmake --install "${SRSRAN_4G_SRC}/build"
   sudo_if_needed ldconfig

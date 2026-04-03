@@ -44,6 +44,16 @@ rebuild_repo() {
 }
 
 rebuild_repo "srsRAN Project" "https://github.com/srsran/srsRAN_Project.git" "${SRSRAN_PROJECT_SRC}" "${SRSRAN_PROJECT_REF}" -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
-rebuild_repo "srsRAN 4G" "https://github.com/srsran/srsRAN_4G.git" "${SRSRAN_4G_SRC}" "${SRSRAN_4G_REF}"
+rebuild_repo "srsRAN 4G" "https://github.com/srsran/srsRAN_4G.git" "${SRSRAN_4G_SRC}" "${SRSRAN_4G_REF}" \
+  -DENABLE_WERROR=OFF \
+  -DENABLE_SRSENB=OFF \
+  -DENABLE_SRSEPC=OFF \
+  -DENABLE_GUI=OFF \
+  -DENABLE_UHD=OFF \
+  -DENABLE_BLADERF=OFF \
+  -DENABLE_SOAPYSDR=OFF \
+  -DENABLE_SKIQ=OFF \
+  -DENABLE_HARDSIM=OFF \
+  -DENABLE_ZEROMQ=ON
 sudo_if_needed ldconfig
 log "Pinned srsRAN rebuild complete."
