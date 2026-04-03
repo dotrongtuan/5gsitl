@@ -1,0 +1,9 @@
+name: jitter_stress
+objective: Stress latency stability under jitter
+scenario_class: phy
+nr_config_profile: configs/nr_profiles/low_latency_mu1.yaml
+channel_config: configs/channel/jitter.yaml
+traffic_config: { mode: udp-latency, duration_s: 20, bitrate: 5M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_p95_rtt_ms: 45, max_loss_pct: 2 }
+report_metadata: { group: phy, tags: [jitter, stress] }

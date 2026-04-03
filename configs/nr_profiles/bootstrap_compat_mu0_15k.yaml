@@ -1,0 +1,13 @@
+name: bootstrap_compat_mu0_15k
+sa_mode: true
+mu: 0
+scs_khz: 15
+slot_ms: 1.0
+bandwidth_mhz: 20
+duplex_mode: fdd
+traffic_mode: balanced
+low_latency_tuning: false
+scheduler_profile: compatibility
+notes:
+  - Default profile used by bootstrap for srsUE compatibility
+  - Research profiles remain available under configs/nr_profiles/

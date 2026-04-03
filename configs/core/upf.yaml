@@ -1,0 +1,17 @@
+logger:
+  file: ./outputs/logs/open5gs/upf.log
+upf:
+  pfcp:
+    server:
+      - address: 127.0.0.13
+  gtpu:
+    server:
+      - address: 10.20.0.1
+  metrics:
+    server:
+      - address: 127.0.0.13
+        port: 9093
+  session:
+    - subnet: 10.45.0.1/16
+      dnn: internet
+      dev: ogstun

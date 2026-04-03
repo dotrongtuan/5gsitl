@@ -1,0 +1,9 @@
+name: fading_pedestrian
+objective: Evaluate a mild fading profile
+scenario_class: phy
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/fading.yaml
+traffic_config: { mode: ping, count: 20, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_avg_rtt_ms: 40, max_loss_pct: 3 }
+report_metadata: { group: phy, tags: [fading, pedestrian] }

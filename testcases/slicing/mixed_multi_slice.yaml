@@ -1,0 +1,10 @@
+name: mixed_multi_slice
+objective: Run a mixed slice study with custom mapping
+scenario_class: slicing
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/asym_ul_dl.yaml
+traffic_config: { mode: udp-latency, duration_s: 25, bitrate: 8M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/custom_research.yaml
+expected_kpis: { max_avg_rtt_ms: 50, max_loss_pct: 5 }
+report_metadata: { group: slicing, tags: [mixed, multi-slice] }

@@ -1,0 +1,22 @@
+name: urllc
+sst: 1
+sd: "000002"
+dnn: internet-lowlat
+qos:
+  fiveqi: 80
+  arp_priority: 2
+subscriber_map:
+  - imsi: "001010123456781"
+traffic_template:
+  mode: udp-latency
+  bitrate: 5M
+  packet_size: 128
+kpi_targets:
+  max_avg_rtt_ms: 15
+  max_p95_rtt_ms: 25
+ran_profile:
+  scheduler: latency_favoring
+  prb_policy: low_latency
+notes:
+  - Slice realized via profile switching and DNN/QoS separation when full dynamic slicing is unavailable
+  - TODO(version-check): verify policy control hooks for target stack

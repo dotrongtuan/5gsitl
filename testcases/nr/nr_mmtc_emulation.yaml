@@ -1,0 +1,10 @@
+name: nr_mmtc_emulation
+objective: Run a dense small-payload emulation profile
+scenario_class: nr
+nr_config_profile: configs/nr_profiles/mmtc_dense.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: udp-latency, duration_s: 20, bitrate: 1M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/mmtc.yaml
+expected_kpis: { max_loss_pct: 3, max_avg_rtt_ms: 80 }
+report_metadata: { group: nr, tags: [mmtc, emulation] }

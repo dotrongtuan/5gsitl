@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: sitl-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  adapter-api:
+    image: python:3.11-slim
+    container_name: sitl-adapter-api
+    restart: unless-stopped
+    working_dir: /workspace
+    network_mode: host
+    volumes:
+      - ..:/workspace
+    command: >
+      bash -lc "pip install --no-cache-dir -r requirements.txt &&
+      python3 tools/event_bus.py serve --host ${ADAPTER_HTTP_HOST:-127.0.0.1} --port ${ADAPTER_HTTP_PORT:-18080}"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  analysis-shell:
+    image: nicolaka/netshoot:latest
+    container_name: sitl-analysis-shell
+    profiles: ["analysis"]
+    network_mode: host
+    command: ["sleep", "infinity"]
+    volumes:
+      - ..:/workspace
+
+volumes:
+  mongodb-data:

@@ -1,0 +1,9 @@
+name: nr_sa_attach
+objective: Verify SA registration and PDU session setup
+scenario_class: nr
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: ping, count: 4, target: 10.45.0.1, ue_ip: 10.45.0.2 }
+capture_config: { enabled: true }
+expected_kpis: { attach_success: true, ue_ip_allocated: true }
+report_metadata: { group: nr, tags: [attach, sa] }

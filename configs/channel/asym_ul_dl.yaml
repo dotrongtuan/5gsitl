@@ -1,0 +1,11 @@
+profile_name: asym_ul_dl
+sample_rate: 5.76e6
+awgn_enabled: true
+noise_voltage: 0.015
+fading_enabled: true
+fading_profile: vehicular
+delay_ms: 1.2
+jitter_ms: 0.4
+freq_offset_hz: 30.0
+ul_loss_pct: 1.5
+dl_loss_pct: 0.3

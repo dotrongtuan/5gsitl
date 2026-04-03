@@ -1,0 +1,36 @@
+site_name: nr-sitl-lab
+plmn:
+  mcc: "001"
+  mnc: "01"
+tac: 7
+amf_region_id: 2
+amf_set_id: 1
+amf_pointer: 1
+bind:
+  nrf: 127.0.0.10
+  amf: 127.0.0.11
+  smf: 127.0.0.12
+  upf: 127.0.0.13
+  udm: 127.0.0.14
+  ausf: 127.0.0.15
+  udr: 127.0.0.16
+  pcf: 127.0.0.17
+  nssf: 127.0.0.18
+interfaces:
+  n2: 10.10.0.10
+  n3: 10.20.0.1
+  ue_pool: 10.45.0.0/16
+slices:
+  - sst: 1
+    sd: "000001"
+    name: embb
+  - sst: 1
+    sd: "000002"
+    name: urllc
+  - sst: 1
+    sd: "000003"
+    name: mmtc
+notes:
+  - Primary adapter: file polling
+  - Fallback adapter: local REST
+  - TODO(version-check): verify SBI keys against installed Open5GS release

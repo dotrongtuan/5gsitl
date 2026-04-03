@@ -1,0 +1,50 @@
+gnb_id: 411
+ran_node_name: sitl-gnb01
+amf:
+  addr: 10.10.0.10
+  port: 38412
+cu_cp:
+  amf:
+    supported_tracking_areas:
+      - tac: 7
+        plmn_list:
+          - plmn: "00101"
+            tai_slice_support_list:
+              - sst: 1
+                sd: "000001"
+              - sst: 1
+                sd: "000002"
+              - sst: 1
+                sd: "000003"
+cell_cfg:
+  dl_arfcn: 368500
+  band: 3
+  channel_bandwidth_MHz: 20
+  common_scs: 30
+  plmn: "00101"
+  tac: 7
+  pci: 1
+  slicing:
+    - sst: 1
+      sd: "000001"
+    - sst: 1
+      sd: "000002"
+    - sst: 1
+      sd: "000003"
+ru_sdr:
+  device_driver: zmq
+  device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001
+  srate: 5.76
+  tx_gain: 50
+  rx_gain: 50
+log:
+  filename: ./outputs/logs/gnb/gnb.log
+  all_level: info
+pcap:
+  mac_enable: true
+  mac_filename: ./outputs/pcap/gnb_mac.pcap
+  ngap_enable: true
+  ngap_filename: ./outputs/pcap/gnb_ngap.pcap
+notes:
+  - Default NR profile: mu=1, scs=30kHz, slot=0.5ms
+  - TODO(version-check): validate key names against installed srsRAN Project build

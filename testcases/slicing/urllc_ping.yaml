@@ -1,0 +1,10 @@
+name: urllc_ping
+objective: Validate low-latency slice behavior with ping traffic
+scenario_class: slicing
+nr_config_profile: configs/nr_profiles/low_latency_mu1.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: ping, count: 20, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/urllc.yaml
+expected_kpis: { max_avg_rtt_ms: 15, max_p95_rtt_ms: 25 }
+report_metadata: { group: slicing, tags: [urllc, ping] }

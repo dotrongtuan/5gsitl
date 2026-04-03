@@ -1,0 +1,34 @@
+logger:
+  file: ./outputs/logs/open5gs/amf.log
+amf:
+  sbi:
+    server:
+      - address: 127.0.0.11
+        port: 7777
+  ngap:
+    server:
+      - address: 10.10.0.10
+  metrics:
+    server:
+      - address: 127.0.0.11
+        port: 9091
+  guami:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      amf_id: { region: 2, set: 1, pointer: 1 }
+  tai:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      tac: 7
+  plmn_support:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      s_nssai:
+        - { sst: 1, sd: "000001" }
+        - { sst: 1, sd: "000002" }
+        - { sst: 1, sd: "000003" }
+  security:
+    integrity_order: [NIA2, NIA1, NIA0]
+    ciphering_order: [NEA0, NEA1, NEA2]
+  network_name:
+    full: 5G NR SITL
+  amf_name: sitl-amf0
+notes:
+  - TODO(version-check): confirm AMF key names for installed Open5GS release

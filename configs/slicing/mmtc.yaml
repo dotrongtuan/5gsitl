@@ -1,0 +1,19 @@
+name: mmtc
+sst: 1
+sd: "000003"
+dnn: sensors
+qos:
+  fiveqi: 70
+  arp_priority: 12
+subscriber_map:
+  - imsi: "001010123456782"
+traffic_template:
+  mode: bursty-small-packets
+  flows: 64
+  packet_size: 96
+kpi_targets:
+  max_loss_pct: 3
+  max_avg_rtt_ms: 80
+ran_profile:
+  scheduler: fairness
+  prb_policy: dense_devices

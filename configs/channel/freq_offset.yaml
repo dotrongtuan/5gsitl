@@ -1,0 +1,9 @@
+profile_name: freq_offset
+sample_rate: 5.76e6
+awgn_enabled: false
+fading_enabled: false
+delay_ms: 0.0
+jitter_ms: 0.0
+freq_offset_hz: 45.0
+ul_loss_pct: 0.0
+dl_loss_pct: 0.0

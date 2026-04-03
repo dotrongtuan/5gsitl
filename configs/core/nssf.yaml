@@ -1,0 +1,14 @@
+logger:
+  file: ./outputs/logs/open5gs/nssf.log
+nssf:
+  sbi:
+    server:
+      - address: 127.0.0.18
+        port: 7777
+  metrics:
+    server:
+      - address: 127.0.0.18
+        port: 9096
+notes:
+  - Optional service for slice selection
+  - TODO(version-check): confirm NSSF support in target Open5GS package

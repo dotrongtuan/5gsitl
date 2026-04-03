@@ -1,0 +1,10 @@
+name: embb_stream
+objective: Validate eMBB-oriented sustained traffic profile
+scenario_class: slicing
+nr_config_profile: configs/nr_profiles/embb_wideband.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: udp-latency, duration_s: 20, bitrate: 25M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/embb.yaml
+expected_kpis: { min_throughput_mbps: 25, max_avg_rtt_ms: 40 }
+report_metadata: { group: slicing, tags: [embb, stream] }

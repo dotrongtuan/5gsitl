@@ -1,0 +1,9 @@
+name: freq_offset_small
+objective: Track behavior with a small frequency offset
+scenario_class: phy
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/freq_offset.yaml
+traffic_config: { mode: ping, count: 20, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_avg_rtt_ms: 35, max_loss_pct: 2 }
+report_metadata: { group: phy, tags: [freq-offset, small] }

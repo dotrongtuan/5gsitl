@@ -1,0 +1,10 @@
+name: low_latency_mu1
+sa_mode: true
+mu: 1
+scs_khz: 30
+slot_ms: 0.5
+bandwidth_mhz: 20
+duplex_mode: fdd
+traffic_mode: uplink-heavy
+low_latency_tuning: true
+scheduler_profile: latency_favoring

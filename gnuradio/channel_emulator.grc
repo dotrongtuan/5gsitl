@@ -1,0 +1,21 @@
+options:
+  id: nr_sitl_channel
+  output_language: python
+  title: 5G NR SITL Channel Emulator
+  description: |
+    Software-only UL/DL channel emulator for the 5G NR SITL testbed.
+    Intended blocks: ZMQ source -> channel model -> delay -> ZMQ sink for DL and UL.
+    TODO(version-check): open this file with the local GNU Radio Companion build and re-save
+    if block IDs or ZMQ signatures differ from the exported Python runner.
+parameters:
+  sample_rate: 5.76e6
+  noise_voltage: 0.0
+  freq_offset_hz: 0.0
+  delay_ms: 0.0
+paths:
+  - name: downlink
+    source: tcp://127.0.0.1:2000
+    sink: tcp://127.0.0.1:2003
+  - name: uplink
+    source: tcp://127.0.0.1:2002
+    sink: tcp://127.0.0.1:2001

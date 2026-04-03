@@ -1,0 +1,10 @@
+name: low_latency_target
+objective: Measure RTT under the low-latency profile
+scenario_class: latency
+nr_config_profile: configs/nr_profiles/low_latency_mu1.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: ping, count: 25, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/urllc.yaml
+expected_kpis: { max_avg_rtt_ms: 15, max_p95_rtt_ms: 25 }
+report_metadata: { group: latency, tags: [target, low-latency] }

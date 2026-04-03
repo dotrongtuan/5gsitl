@@ -1,0 +1,9 @@
+name: asymmetric_ul_dl
+objective: Compare UL/DL asymmetry effects on latency and loss
+scenario_class: phy
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/asym_ul_dl.yaml
+traffic_config: { mode: udp-latency, duration_s: 20, bitrate: 5M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_avg_rtt_ms: 55, max_loss_pct: 5 }
+report_metadata: { group: phy, tags: [asymmetric, ul-dl] }

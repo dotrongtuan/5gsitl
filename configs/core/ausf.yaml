@@ -1,0 +1,7 @@
+logger:
+  file: ./outputs/logs/open5gs/ausf.log
+ausf:
+  sbi:
+    server:
+      - address: 127.0.0.15
+        port: 7777

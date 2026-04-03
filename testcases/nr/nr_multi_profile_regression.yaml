@@ -1,0 +1,9 @@
+name: nr_multi_profile_regression
+objective: Regression placeholder for multiple NR profiles
+scenario_class: nr
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: ping, count: 8, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_avg_rtt_ms: 30, max_loss_pct: 2 }
+report_metadata: { group: nr, tags: [regression, multi-profile] }

@@ -1,0 +1,9 @@
+name: baseline_rtt
+objective: Establish a baseline RTT reference for the SITL stack
+scenario_class: latency
+nr_config_profile: configs/nr_profiles/default_mu1_30k.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: ping, count: 20, target: 10.45.0.1 }
+capture_config: { enabled: true }
+expected_kpis: { max_avg_rtt_ms: 25, max_p95_rtt_ms: 35 }
+report_metadata: { group: latency, tags: [baseline, rtt] }

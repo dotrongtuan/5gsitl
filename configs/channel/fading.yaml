@@ -1,0 +1,11 @@
+profile_name: fading_pedestrian
+sample_rate: 5.76e6
+awgn_enabled: true
+noise_voltage: 0.01
+fading_enabled: true
+fading_profile: pedestrian
+delay_ms: 0.3
+jitter_ms: 0.1
+freq_offset_hz: 20.0
+ul_loss_pct: 0.0
+dl_loss_pct: 0.0

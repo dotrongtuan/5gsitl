@@ -1,0 +1,18 @@
+name: custom_research
+sst: 1
+sd: "00F0AA"
+dnn: research
+qos:
+  fiveqi: 7
+  arp_priority: 6
+subscriber_map:
+  - imsi: "001010123456780"
+  - imsi: "001010123456781"
+traffic_template:
+  mode: mixed
+  notes: Tune per study
+kpi_targets:
+  notes: Set per testcase
+ran_profile:
+  scheduler: custom
+  prb_policy: experiment_defined

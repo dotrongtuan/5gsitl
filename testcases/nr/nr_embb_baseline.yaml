@@ -1,0 +1,10 @@
+name: nr_embb_baseline
+objective: Establish a baseline eMBB-oriented NR run
+scenario_class: nr
+nr_config_profile: configs/nr_profiles/embb_wideband.yaml
+channel_config: configs/channel/bypass.yaml
+traffic_config: { mode: udp-latency, duration_s: 20, bitrate: 20M, target: 10.45.0.1 }
+capture_config: { enabled: true }
+slice_profile: configs/slicing/embb.yaml
+expected_kpis: { min_throughput_mbps: 20, max_avg_rtt_ms: 40 }
+report_metadata: { group: nr, tags: [embb, baseline] }

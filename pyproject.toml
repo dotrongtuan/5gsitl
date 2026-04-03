@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "5g-nr-sitl-omnetpp-testbed"
+version = "0.1.0"
+description = "Software-in-the-loop 5G NR SA testbed with OMNeT++ visualization"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "requests>=2.32",
+  "rich>=13.7",
+  "pandas>=2.2",
+  "matplotlib>=3.8",
+  "scapy>=2.5",
+  "jinja2>=3.1",
+  "typer>=0.12",
+  "jsonschema>=4.23",
+  "pytest>=8.3",
+]
+
+[project.scripts]
+sitl-run-testcase = "tools.run_testcase:main"
+sitl-run-suite = "tools.run_suite:main"
+sitl-run-nr = "tools.run_nr_experiment:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "integration: long-running or host-dependent integration checks",
+  "smoke: lightweight scaffold checks",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.hatch.build.targets.wheel]
+packages = ["tools", "adapters"]

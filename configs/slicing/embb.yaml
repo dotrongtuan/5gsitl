@@ -1,0 +1,18 @@
+name: embb
+sst: 1
+sd: "000001"
+dnn: internet
+qos:
+  fiveqi: 9
+  arp_priority: 8
+subscriber_map:
+  - imsi: "001010123456780"
+traffic_template:
+  mode: iperf3-downlink
+  bitrate: 50M
+kpi_targets:
+  min_throughput_mbps: 25
+  max_avg_rtt_ms: 40
+ran_profile:
+  scheduler: time_rr
+  prb_policy: throughput_favoring

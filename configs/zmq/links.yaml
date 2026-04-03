@@ -1,0 +1,23 @@
+sample_rate_msps: 5.76
+links:
+  gnb_dl_tx:
+    bind: tcp://127.0.0.1:2000
+    description: gNB -> channel downlink source
+  channel_dl_rx:
+    connect: tcp://127.0.0.1:2000
+  channel_dl_tx:
+    bind: tcp://127.0.0.1:2003
+    description: channel -> UE downlink sink
+  ue_ul_tx:
+    bind: tcp://127.0.0.1:2002
+    description: UE -> channel uplink source
+  channel_ul_rx:
+    connect: tcp://127.0.0.1:2002
+  channel_ul_tx:
+    bind: tcp://127.0.0.1:2001
+    description: channel -> gNB uplink sink
+capture_points:
+  - N2
+  - N3
+  - UPF-DN
+  - host-bridge

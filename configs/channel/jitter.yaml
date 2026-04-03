@@ -1,0 +1,9 @@
+profile_name: jitter
+sample_rate: 5.76e6
+awgn_enabled: false
+fading_enabled: false
+delay_ms: 0.8
+jitter_ms: 0.5
+freq_offset_hz: 0.0
+ul_loss_pct: 0.0
+dl_loss_pct: 0.0

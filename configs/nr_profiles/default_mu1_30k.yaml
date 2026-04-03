@@ -1,0 +1,10 @@
+name: default_mu1_30k
+sa_mode: true
+mu: 1
+scs_khz: 30
+slot_ms: 0.5
+bandwidth_mhz: 20
+duplex_mode: fdd
+traffic_mode: balanced
+low_latency_tuning: false
+scheduler_profile: default

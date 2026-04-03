@@ -1,0 +1,13 @@
+logger:
+  file: ./outputs/logs/open5gs/pcf.log
+pcf:
+  sbi:
+    server:
+      - address: 127.0.0.17
+        port: 7777
+  metrics:
+    server:
+      - address: 127.0.0.17
+        port: 9095
+notes:
+  - Optional service for policy and slice profile mapping
