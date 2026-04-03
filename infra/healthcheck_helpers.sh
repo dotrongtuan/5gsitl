@@ -9,5 +9,5 @@ check_port() {
 
 check_pid_file() {
   local pid_file="$1"
-  [[ -f "$pid_file" ]] && kill -0 "$(cat "$pid_file")" >/dev/null 2>&1
+  [[ -f "$pid_file" ]] && ps -p "$(cat "$pid_file")" >/dev/null 2>&1
 }

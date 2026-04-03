@@ -15,6 +15,8 @@ def main() -> None:
                 pid = int(pid_file.read_text(encoding="utf-8").strip())
                 os.kill(pid, 0)
                 summary[pid_file.stem] = "running"
+            except PermissionError:
+                summary[pid_file.stem] = "running"
             except Exception:
                 summary[pid_file.stem] = "stale"
     print(json.dumps(summary, indent=2, sort_keys=True))

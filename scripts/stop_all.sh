@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
-for name in mongodb omnetpp adapter-slice adapter-testcase adapter-metrics adapter-state ue gnb channel \
+for name in mongodb omnetpp adapter-api adapter-slice adapter-testcase adapter-metrics adapter-state ue gnb channel \
   nssf pcf udr udm ausf upf smf amf nrf; do
   kill_if_running "$name" || true
 done

@@ -11,6 +11,18 @@ require_bin open5gs-ausfd
 require_bin open5gs-udmd
 require_bin open5gs-udrd
 
+stop_packaged_open5gs_services() {
+  if ! command -v systemctl >/dev/null 2>&1; then
+    return 0
+  fi
+
+  for service in \
+    open5gs-nrfd open5gs-amfd open5gs-smfd open5gs-upfd open5gs-ausfd \
+    open5gs-udmd open5gs-udrd open5gs-pcfd open5gs-nssfd; do
+    sudo_if_needed systemctl stop "${service}" >/dev/null 2>&1 || true
+  done
+}
+
 start_mongodb() {
   if command -v mongod >/dev/null 2>&1; then
     if command -v systemctl >/dev/null 2>&1; then
@@ -39,6 +51,7 @@ start_mongodb() {
 }
 
 mkdir -p "${PROJECT_ROOT}/outputs/logs/open5gs"
+stop_packaged_open5gs_services
 start_mongodb
 
 if ! PYTHONPATH="${PROJECT_ROOT}" python3 -m tools.provision_subscribers \
