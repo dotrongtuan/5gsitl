@@ -15,6 +15,10 @@ The project provides a practical SITL harness where:
 
 No SDR, USRP, OTA, or physical RF front-end is required.
 
+Vietnamese documentation:
+
+- `docs/huong_dan_su_dung_vi.md`
+
 ## Full 5G NR Scope
 
 Supported experiment categories:
